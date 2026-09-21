@@ -1,0 +1,3 @@
+# Shared repository instructions stay under the standard discovery budget.
+# Model, reasoning effort, approval policy and sandbox use the user's settings.
+project_doc_max_bytes = 32768
