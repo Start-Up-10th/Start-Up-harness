@@ -12,7 +12,8 @@
     "contracts/README.md", "web/AGENTS.md", "web/CLAUDE.md", "server/AGENTS.md", "server/CLAUDE.md",
     "ai/AGENTS.md", "ai/CLAUDE.md", "infra/AGENTS.md", "infra/CLAUDE.md", "infra/.env.example",
     "tests/acceptance/README.md", "tests/acceptance/scenarios.json",
-    "harness/check.mjs", "harness/check.test.mjs", "harness/sync-skills.mjs", ".github/workflows/harness.yml"
+    "harness/check.mjs", "harness/check.test.mjs", "harness/hooks.mjs", "harness/hooks.test.mjs", "harness/sync-skills.mjs",
+    ".codex/hooks.json", ".github/workflows/harness.yml"
   ],
   "skills": ["dorm-implement", "dorm-verify", "dorm-spec-update", "dorm-docker"],
   "scopes": ["web", "server", "ai", "infra"]

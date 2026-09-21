@@ -174,6 +174,9 @@ export function validate(root = ROOT) {
   report.skills = originals.length;
   const settings = json('.claude/settings.json');
   if (!settings?.permissions || !Array.isArray(settings.permissions.allow)) fail('Invalid Claude project settings');
+  if (!settings?.hooks?.PreToolUse?.length || !settings?.hooks?.PostToolUse?.length) fail('Claude hooks are not configured');
+  const codexHooks = json('.codex/hooks.json');
+  if (!codexHooks?.hooks?.PreToolUse?.length || !codexHooks?.hooks?.PostToolUse?.length) fail('Codex hooks are not configured');
   const packageFile = json('package.json');
   if (!packageFile?.private || !packageFile.scripts?.['harness:check'] || !packageFile.scripts?.['harness:sync']) fail('Missing harness package scripts');
   return { errors, ...report };

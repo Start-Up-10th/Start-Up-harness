@@ -14,6 +14,10 @@ npm run harness:sync
 두 번째는 명시적인 파일 생성 명령이며 `.agents/skills`의 SKILL.md를 `.claude/skills`로 동기화한다.
 잘못된 이름·경로·심볼릭 링크는 거부하며 임의 파일을 삭제하지 않는다.
 
+프로젝트 훅은 Claude Code와 Codex의 PreToolUse/PostToolUse에 연결된다. credential 형태의 문자열과
+위험한 Git·Docker·데이터베이스 삭제 명령은 차단하고, 명세·스킬·하네스 변경 뒤에는 검사를 안내한다.
+훅은 안전 보조장치일 뿐 최종 기준이 아니며, `npm run harness:check`와 CI를 반드시 실행한다.
+
 이 검사기는 명세 문장의 의미 전체, 제품 구현, 실제 학교 API, 카메라 정확도를 자동 증명하지 않는다.
 REQ 연결의 완전성은 파일 내 정의된 REQ를 기준으로 한다. 인터뷰 누락 여부는 출처와 별도 대조한다.
 

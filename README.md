@@ -40,7 +40,7 @@ Claude Code는 [CLAUDE.md](CLAUDE.md)에서 공통 지침을 가져온다. Codex
 ├── ai/                      FastAPI·MediaPipe 담당 지침
 ├── infra/                   Docker·GitHub Actions·GSM SV 지침
 ├── tests/acceptance/         요구사항별 수용 시나리오
-├── harness/                 문서·스킬·추적성 검사와 자체 테스트
+├── harness/                 문서·스킬·추적성 검사·안전 훅과 자체 테스트
 └── .github/workflows/       하네스 검사 CI
 ```
 
@@ -56,6 +56,8 @@ Claude Code는 [CLAUDE.md](CLAUDE.md)에서 공통 지침을 가져온다. Codex
 | Docker·Compose·컨테이너 배포/장애 | `$dorm-docker` | `/dorm-docker` |
 
 스킬 원본은 `.agents/skills`에서만 수정한다. `npm run harness:sync`로 Claude 복사본을 갱신하고 함께 커밋한다. Windows에서 별도 심볼릭 링크 권한 없이 작동한다.
+
+`harness/hooks.mjs`는 Claude Code와 Codex에 공통 연결되어 credential 형태의 문자열과 위험한 Git·Docker·데이터베이스 삭제 명령을 차단한다. 명세·스킬·하네스 변경 뒤에는 검사를 안내하며, 최종 기준은 `npm run harness:check`와 CI다.
 
 ## 문서 찾기
 

@@ -6,5 +6,29 @@
       "Bash(npm run harness:lint)",
       "Bash(npm run harness:test)"
     ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/harness/hooks.mjs\" claude-pre"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/harness/hooks.mjs\" claude-post"
+          }
+        ]
+      }
+    ]
   }
 }

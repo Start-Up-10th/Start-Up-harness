@@ -10,6 +10,7 @@
 ## 진행 순서
 
 - [x] H0 하네스: 명세·출처·두 도구 지침·스킬 동기화·수용 시나리오·로컬 검사 완료.
+- [x] H0.1 안전 훅: Claude/Codex secret·위험 명령 차단과 하네스 변경 후 검사 안내 추가.
 - [ ] P1 기반: web/server/ai 실행 골격, 버전 고정, DB migration, mock DataGSM, 공통 API 오류/시간 규약, 실제 검증 명령 등록.
 - [ ] P2 첫 기능: 학생/관리자 로그인·권한·동의, 호실 그룹·관리자 전개도·수동 출석, 일일 초기화. 실제 DataGSM 응답/전체 명단 경로 확인 병행.
 - [ ] P3 QR: 독립 세션, heartbeat 종료, 15분 교체·만료, 로그인 복귀, 중복·운영일·동시 기기 검증.
@@ -31,6 +32,7 @@ P1~P7은 개발 실행 시 채운다. H0 완료가 P1 이후의 사용자 승인
 | 2026-09-21 | Codex 지침/스킬 발견 | 현재 작업에 루트 AGENTS와 프로젝트 스킬 3개가 실제 제공됨 |
 | 2026-09-21 | Skill Creator의 별도 Python quick_validate 실행 | 번들 환경의 PyYAML 부재로 실행 불가. 이 저장소의 Node frontmatter·이름·링크·동기화 검사는 통과. 별도 설치하지 않음 |
 | 2026-09-21 | Docker 스킬 추가 후 `npm run harness:sync` / `npm run harness:check` | dorm-docker 양쪽 연결, 공통 스킬 4개·Markdown 40개·REQ/시나리오 38개 검사 및 자체 테스트 12/12 통과. Docker 빌드/배포 실행은 범위에 없음 |
+| 2026-09-21 | Claude/Codex 안전 훅 추가 후 `npm run harness:check` | secret·위험 명령 차단, 명세·스킬 변경 후 검사 안내, 훅 테스트 포함 자체 테스트 20/20 통과. 실제 Claude Code/Codex 세션 훅 실행은 미검증 |
 
 Claude Code 실제 실행, GitHub Actions 원격 실행, Linux/Node22 실행, 제품 API/카메라/배포는 수행하지 않았다.
 제품 시나리오는 모두 specified(0/38 verified)다. 다음 단계는 P1이다.

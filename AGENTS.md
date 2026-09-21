@@ -38,6 +38,7 @@
 - Dockerfile·Compose·컨테이너 배포/장애 작업은 `.agents/skills/dorm-docker/SKILL.md`를 사용한다.
 - 작업 절차: [docs/workflow.md](docs/workflow.md).
 - 로컬 검사: `npm run harness:check`.
+- 자동 훅은 secret·위험 명령을 차단하고 하네스 관련 변경 뒤 검사를 안내한다. 훅 자체의 동작은 `harness/hooks.test.mjs`에서 검증한다.
 - 스킬 동기화: `npm run harness:sync` 후 검사. `.claude/skills`를 직접 수정하지 않는다.
 - 테스트·빌드 명령은 실제 서비스가 생성될 때 등록한다. 존재하지 않는 명령을 성공 처리하지 않는다.
 - 결과에는 구현 내용, 실행한 검사, 미검증 부분, 다음 작업을 기록한다.
