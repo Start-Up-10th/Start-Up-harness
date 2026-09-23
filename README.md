@@ -66,5 +66,7 @@ Claude Code는 [CLAUDE.md](CLAUDE.md)에서 공통 지침을 가져온다. Codex
 - 개발자가 판단할 기술 항목: [docs/decisions.md](docs/decisions.md)
 - 사용자가 다시 정할 필요 없는 개발 순서: [docs/plans/implementation.md](docs/plans/implementation.md)
 - 검증 범위·명령: [docs/verification.md](docs/verification.md)
+- 하네스 평가·재현 근거: [2026-09-23 평가](docs/reviews/harness-assessment-2026-09-23.md)
+- 하네스 개선 순서·완료 기준: [개선 계획](docs/plans/harness-improvements.md)
 
 GitHub 저장소 생성·커밋·푸시·실제 배포는 수행하지 않았다. 운영 OAuth 값과 서버 접속 정보는 연동 단계에서 제공한다.
