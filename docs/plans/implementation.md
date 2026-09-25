@@ -30,10 +30,30 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 
 - [ ] 인증 헤더, 사용자 식별자 타입, 공통 오류 envelope, `requestId`를 정한다.
 - [ ] 서버 UTC 시각과 Asia/Seoul 08:00 운영일 계산을 공통화한다.
-- [ ] `student_id`, `studentId`, `studentNumber`, `dormitoryRoom` 매핑을 고정한다.
+- [x] `DataGSM student.id → studentId`, `student.studentNumber → studentNumber`, `student.dormitoryRoom → dormitoryRoom` 매핑을 고정한다.
+- [x] `student.role`·`teacher.department`로 서비스 관리자 권한을 판정하고 최상위 `role`은 계정 역할로만 취급한다.
+- [x] `status → accountStatus`, OAuth callback 검증값 `state → oauthState`를 분리한다.
 - [ ] DB migration, 테스트용 clock, 민감정보 없는 로그·fixture를 준비한다.
 - [ ] 실제 구현 뒤 비어 있지 않은 OpenAPI 계약을 `contracts/`에 생성한다.
 - [ ] 관리자·본인·본인 호실 권한을 서버에서 검증한다.
+
+## DataGSM 연동 구현 기준
+
+- `DataGsmOAuthClient`는 authorization code 교환, `userinfo` 조회, 로그인 사용자 매핑만 담당한다.
+- `DataGsmStudentClient`는 `GET https://openapi.datagsm.kr/v1/students`를 `X-API-KEY`와 `STUDENT_READ` 권한으로 호출하고 페이지네이션을 처리한다.
+- DataGSM 원본 DTO와 내부 Principal/Student 모델을 분리한다. 원본 숫자형 `id`는 `Long`으로 받고, 내부 계약이 문자열이면 어댑터에서만 변환한다.
+- 내부 매핑은 다음을 따른다.
+  - `externalUserId ← userinfo.id`
+  - `studentId ← userinfo.student.id`
+  - `studentNumber ← userinfo.student.studentNumber`
+  - `name ← student.name | teacher.name`
+  - `dormitoryRoom ← student.dormitoryRoom`
+  - `accountStatus ← userinfo.status`
+  - `subjectType ← userinfo.objectType`
+- `STUDENT`는 `student.role ∈ {DORMITORY_MANAGER, STUDENT_COUNCIL}`, `TEACHER`는 `teacher.department == DORMITORY`일 때만 서비스 관리자다.
+- `status != ACTIVE`, `objectType`와 중첩 객체 불일치, 지원하지 않는 사용자 유형은 인증 실패로 처리한다.
+- AI `recognition.studentId`는 백엔드 canonical `studentId` 계약을 유지하고, `UNKNOWN`은 `studentId: null`로 전달한다.
+- `userinfo`를 전체 학생 명단으로 사용하지 않는다. 학생 OpenAPI의 실제 권한·페이지네이션·졸업/전학/퇴사 신호를 연동 검증으로 남긴다.
 
 ## 기능 간 의존성
 
@@ -80,5 +100,7 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 | 2026-09-22 | API 명세 폴더 대조 | 8개 API 그룹별 기능 계획으로 재편 |
 | 2026-09-23 | CI 선구축 지침 반영·공식 문서/공개 저장소 비교·로컬 진단 | DEC-013 추가, 평가와 개선 계획 작성. 기준 검사 20/20 통과와 별개로 훅 입력/경로 및 검증 증빙의 허점을 재현. 실제 에이전트 새 세션·원격 CI·제품 실행은 미검증. |
 | 2026-09-24 | Notion ZIP 항목 3개 사용자 승인 반영 | 얼굴 자동 촬영, 관리자 휴대폰 5탭, 봉사 횟수 `+ / −`를 출처·명세·수용 시나리오·분야별 계획에 반영. 제품 코드는 미구현. 이번 변경 뒤 자동 검사는 실행하지 않음. |
+| 2026-09-26 | DataGSM 연동 구조 수정안 반영 | userinfo 중첩 매핑·권한 판정·OAuth state 분리·학생 OpenAPI 경계와 수용 시나리오 갱신 |
+| 2026-09-26 | `npm run harness:check` | 하네스 문서 검사 및 테스트 통과, 제품 서비스는 미구현 |
 
-현재 변경은 계획 문서뿐이며 제품 API·웹·AI·배포 구현은 수행하지 않았다.
+현재 변경은 명세·계획 문서뿐이며 제품 API·웹·AI·배포 구현은 수행하지 않았다.
