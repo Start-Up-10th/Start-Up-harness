@@ -9,7 +9,7 @@
 ## 인증 (구현됨)
 
 - 로그인 상태는 `SESSION` 쿠키로 전달한다(DEC-016). 웹은 `credentials: 'include'`로 요청한다. `Authorization`·`RefreshToken` 헤더는 쓰지 않는다.
-- `GET /auth/login`, `GET /auth/callback`, `GET /auth/me`, `POST /auth/logout`. 세부는 [인증 계획](../docs/plans/auth.md).
+- `GET /api/v1/auth/login`, `GET /api/v1/auth/callback`, `GET /api/v1/auth/me`, `POST /api/v1/auth/logout`. 세부는 [인증 계획](../docs/plans/auth.md).
 - 상태 코드: 400 = `oauthState` 없음·만료·재사용, 401 = 비로그인, 403 = 권한 없음·비활성 계정, 로그아웃 성공 = 204.
 - 공통 오류 envelope는 아직 없다.
 

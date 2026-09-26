@@ -17,7 +17,7 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 
 | API 그룹 | 계획 파일 | API 범위 | 담당자 | 상태 |
 | --- | --- | --- | --- | --- |
-| 인증 | [auth.md](auth.md) | `/auth/*` | 강민우 | 진행 중 (`feat/datagsm-oauth`) |
+| 인증 | [auth.md](auth.md) | `/api/v1/auth/*` | 강민우 | 진행 중 (`feat/datagsm-oauth`) |
 | 상태 확인 | [health-check.md](health-check.md) | `/api/v1/health` | 김준수 | 미착수 |
 | 학생·출석 | [student-attendance.md](student-attendance.md) | `/api/v1/student`, `/api/v1/attend` | 김준수 | 미착수 |
 | 호실 명단 | [room-roster.md](room-roster.md) | `/api/v1/room/student` | 임서하 | 미착수 |
@@ -69,7 +69,7 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 6. 공지 CRUD·내부 알림 API가 없다.
 7. 호실 API는 단일 호실 조회만 정의해 관리자 층 전개도 전체 조회를 직접 지원하지 않는다.
 8. webhook의 event 값, 서명 방식, old/new 실제 필드, 재전송 idempotency가 미정이다.
-9. 공통 오류 envelope와 `/api/v1` prefix 적용 여부가 정해지지 않았다. 인증은 세션 쿠키 방식으로 정해져 `RefreshToken` 헤더는 쓰지 않는다(DEC-016).
+9. 공통 오류 envelope가 정해지지 않았다. 모든 API는 `/api/v1` prefix를 붙인다. 인증은 세션 쿠키 방식으로 정해져 `RefreshToken` 헤더는 쓰지 않는다(DEC-016).
 10. 봉사 증가·차감 API의 재시도 idempotency와 0회 하한 검증을 구현 계약에 반영한다. UI 노출은 SRC-NOTION-CHECKUPZIP 승인으로 `+ / −` 모두 확정됐다.
 
 없는 경로를 임의로 구현하지 않고, 제공자·소비자·관련 REQ·수용 시나리오를 정한 뒤 `contracts/`에 반영한다.

@@ -10,8 +10,8 @@
 | 인가 | `https://oauth.authorization.datagsm.kr/v1/oauth/authorize` |
 | 토큰 교환 | `https://oauth.authorization.datagsm.kr/v1/oauth/token` |
 | 사용자 정보 | `https://oauth.resource.datagsm.kr/userinfo` |
-| 개발 Redirect URI | `http://localhost:8080/auth/callback` (백엔드) |
-| 운영 Redirect URI | `https://실제-서비스-주소/auth/callback` (백엔드) |
+| 개발 Redirect URI | `http://localhost:8080/api/v1/auth/callback` (백엔드) |
+| 운영 Redirect URI | `https://실제-서비스-주소/api/v1/auth/callback` (백엔드) |
 
 Redirect URI는 백엔드 callback이다(DEC-016). 로그인 완료 후 웹 화면으로 복귀하는 방식은 웹·백엔드가 정한다.
 Client ID·Secret·scope와 정확한 운영 주소는 연동/배포 때 확보한다. 가짜 값을 실서비스 값으로 사용하지 않는다.
