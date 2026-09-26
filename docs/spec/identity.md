@@ -65,7 +65,7 @@ DataGSM 원본 DTO의 숫자형 `id`는 원본 경계에서 `Long`으로 처리�
 
 사감과 자치위원은 동일한 관리자 권한을 가진다. 학생 관리자 여부는
 `objectType == STUDENT`, `student != null`인 경우의 `student.role`로 판별한다.
-`student.role`이 `DORMITORY_MANAGER` 또는 `STUDENT_COUNCIL`이면 관리자다.
+`student.role`이 `DORMITORY_MANAGER`(기숙사 자치위원)이면 관리자다. 학생회(`STUDENT_COUNCIL`)는 관리자가 아니다.
 사감 선생님은 `objectType == TEACHER`, `teacher != null`인 경우의
 `teacher.department == DORMITORY`이면 관리자다.
 최상위 `role == ADMIN`은 DataGSM 계정 역할일 뿐 서비스 관리자 권한으로 자동 승격하지 않는다.

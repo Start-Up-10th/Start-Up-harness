@@ -17,14 +17,13 @@
 - `oauthState`는 UUID로 만들고 PKCE `codeVerifier`와 함께 Redis `oauth:state:{state}`에 5분 저장. callback에서 `getAndDelete`로 한 번만 사용
 - state가 없거나 만료·재사용이면 400
 - `status != ACTIVE`, 학생인데 `student` 또는 `student.role`이 없음, 기숙사부가 아닌 교사, 지원하지 않는 `objectType`은 403
-- 역할 판정: 학생 `DORMITORY_MANAGER`와 교사 `DORMITORY`는 `ADMIN`, 그 외 활성 학생은 `STUDENT`
+- 역할 판정: 학생 `DORMITORY_MANAGER`(기숙사 자치위원)와 교사 `DORMITORY`는 `ADMIN`, 학생회(`STUDENT_COUNCIL`)를 포함한 그 외 활성 학생은 `STUDENT`
 - 로그인 시 `member`(`datagsm_id`=최상위 `id`, 이름, 역할)와 `student`(학년, 반, 번호, 학번, 호실)를 저장·갱신
 - 로그인 시 기존 세션을 무효화하고 새 세션에 회원 id와 역할을 저장해 세션 고정을 막음
 - `/auth/me`는 현재 `name`, `role`만 반환
 
 ## 명세와 다른 부분
 
-- [ ] `STUDENT_COUNCIL` 학생을 관리자로 판정하지 않는다. REQ-AUTH-003은 관리자로 본다.
 - [ ] `student.id`(canonical `studentId`)를 저장하지 않는다. REQ-AUTH-002 매핑과 맞춰야 한다.
 - [ ] 권한 부족 문구가 `이용 권한이 없는 계정입니다.`다. REQ-AUTH-003 문구는 `관리자 권한이 없는 계정입니다.`다.
 - [ ] `/auth/me`에 학생 ID·학번·호실·동의/얼굴 등록 상태가 없다.
@@ -46,7 +45,7 @@
 - 수용 시나리오: `ACC-AUTH-001~005`
 - 학생 `student.id`와 표시용 `student.studentNumber`를 분리하고, 최상위 `role`과 내부 관리자 권한을 혼동하지 않는다.
 - `STUDENT`/`TEACHER`의 중첩 객체 누락, `status=PENDING`, 지원하지 않는 `objectType`을 거부한다.
-- `STUDENT`의 `DORMITORY_MANAGER`·`STUDENT_COUNCIL`, `TEACHER`의 `DORMITORY`만 관리자 권한을 갖는지 확인한다.
+- `STUDENT`의 `DORMITORY_MANAGER`, `TEACHER`의 `DORMITORY`만 관리자 권한을 갖는지 확인한다.
 - 잘못된·만료·재사용 `oauthState`, 만료 code, DataGSM 장애, 권한 부족을 구분한다.
 - 로그아웃 후 같은 세션 쿠키로 `/auth/me`가 401인지 확인한다.
 - 학생이 다른 학생의 `/auth/me`·보호 API 범위를 얻지 못하는지 확인한다.

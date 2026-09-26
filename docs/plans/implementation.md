@@ -50,7 +50,7 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
   - `dormitoryRoom ← student.dormitoryRoom`
   - `accountStatus ← userinfo.status`
   - `subjectType ← userinfo.objectType`
-- `STUDENT`는 `student.role ∈ {DORMITORY_MANAGER, STUDENT_COUNCIL}`, `TEACHER`는 `teacher.department == DORMITORY`일 때만 서비스 관리자다.
+- `STUDENT`는 `student.role == DORMITORY_MANAGER`, `TEACHER`는 `teacher.department == DORMITORY`일 때만 서비스 관리자다.
 - `status != ACTIVE`, `objectType`와 중첩 객체 불일치, 지원하지 않는 사용자 유형은 인증 실패로 처리한다.
 - AI `recognition.studentId`는 백엔드 canonical `studentId` 계약을 유지하고, `UNKNOWN`은 `studentId: null`로 전달한다.
 - `userinfo`를 전체 학생 명단으로 사용하지 않는다. 학생 OpenAPI의 실제 권한·페이지네이션·졸업/전학/퇴사 신호를 연동 검증으로 남긴다.

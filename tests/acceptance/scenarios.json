@@ -98,7 +98,7 @@
       "given": "학생 사감·자치위원·일반 학생·사감 교사·일반 교직원·미로그인 세션",
       "when": "관리자 API와 타인 봉사/다른 호실 정보를 요청한다",
       "then": [
-        "STUDENT의 student.role=DORMITORY_MANAGER와 STUDENT_COUNCIL은 관리자이고 GENERAL_STUDENT는 일반 학생이다",
+        "STUDENT의 student.role=DORMITORY_MANAGER는 관리자이고 STUDENT_COUNCIL과 GENERAL_STUDENT는 일반 학생이다",
         "TEACHER의 teacher.department=DORMITORY는 관리자이고 GRADE는 일반 교직원이다",
         "최상위 role=USER인 학생 사감은 정상 관리자이며 최상위 role=DORMITORY_MANAGER만 있는 잘못된 구조는 관리자 판정을 받지 않는다",
         "학생과 비로그인은 관리자 변경·벡터 조회를 거부당한다",
