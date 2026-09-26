@@ -21,6 +21,7 @@
 | DEC-013 | 확정 · 하네스/데브옵스 · 2026-09-23 | CI/CD 구성과 정적 검사는 서비스 개발 전에 준비 가능. 실행 가능한 골격·명령부터 테스트/빌드를 연결하며 전체 기능 완성을 기다리지 않는다. 미구현·비활성·건너뛴 작업은 검증 성공으로 간주하지 않는다. 실제 배포는 산출물·대상 환경과 요청 범위가 갖춰진 경우 실행한다. 근거: SRC-HARNESS-CI. |
 | DEC-014 | 확정 · 제품/웹 · 2026-09-24 | SRC-NOTION-CHECKUPZIP 중 얼굴 등록 자동 카운트다운·촬영중·완료 흐름과 다시 찍기/완료 조작, 관리자 휴대폰 홈/QR/얼굴/봉사/로그아웃 5탭, 관리자 봉사 횟수 즉시 +1/-1·0 미만 방지를 채택. ZIP의 다른 항목은 이 결정으로 승인되지 않는다. 학생은 누적 횟수만 조회한다. |
 | DEC-015 | 확정 · 팀 · 2026-09-26 | PR 제목과 커밋 메시지는 `[type] 설명`(type 소문자)으로 통일한다. 브랜치·PR 대상 규칙과 함께 [Git·PR 컨벤션](conventions.md)에 둔다. 머지된 이전 형식의 이력은 재작성하지 않는다. |
+| DEC-016 | 확정 · 백엔드 · 2026-09-27 | 로그인 유지는 JWT가 아닌 Spring Session Redis 서버 세션으로 한다. namespace `checkup:session`, 쿠키 `SESSION`(HttpOnly, SameSite=Lax, Secure는 `SESSION_COOKIE_SECURE`), 무요청 만료 기본 7일(`SESSION_TIMEOUT`). refresh token·재발급 API는 두지 않는다. CSRF 토큰은 끄고 SameSite=Lax를 1차 방어로 쓰므로 운영에서 웹과 API를 same-site로 배치한다. DataGSM 연동은 공식 SDK `com.github.themoment-team:datagsm-oauth-sdk-java:1.6.0`(jitpack)을 쓰고 Spring `oauth2-client`는 쓰지 않는다. DataGSM Redirect URI는 백엔드 `/auth/callback`이다. 인증 경로는 `/auth/*`이며 공통 `/api/v1` prefix는 미정이다. |
 
 ## 하네스 선택
 
