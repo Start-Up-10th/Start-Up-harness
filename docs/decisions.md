@@ -22,6 +22,7 @@
 | DEC-014 | 확정 · 제품/웹 · 2026-09-24 | SRC-NOTION-CHECKUPZIP 중 얼굴 등록 자동 카운트다운·촬영중·완료 흐름과 다시 찍기/완료 조작, 관리자 휴대폰 홈/QR/얼굴/봉사/로그아웃 5탭, 관리자 봉사 횟수 즉시 +1/-1·0 미만 방지를 채택. ZIP의 다른 항목은 이 결정으로 승인되지 않는다. 학생은 누적 횟수만 조회한다. |
 | DEC-015 | 확정 · 팀 · 2026-09-26 | PR 제목과 커밋 메시지는 `[type] 설명`(type 소문자)으로 통일한다. 브랜치·PR 대상 규칙과 함께 [Git·PR 컨벤션](conventions.md)에 둔다. 머지된 이전 형식의 이력은 재작성하지 않는다. |
 | DEC-016 | 확정 · 백엔드 · 2026-09-27 | 로그인 유지는 JWT가 아닌 Spring Session Redis 서버 세션으로 한다. namespace `checkup:session`, 쿠키 `SESSION`(HttpOnly, SameSite=Lax, Secure는 `SESSION_COOKIE_SECURE`), 무요청 만료 기본 7일(`SESSION_TIMEOUT`). refresh token·재발급 API는 두지 않는다. CSRF 토큰은 끄고 SameSite=Lax를 1차 방어로 쓰므로 운영에서 웹과 API를 same-site로 배치한다. DataGSM 연동은 공식 SDK `com.github.themoment-team:datagsm-oauth-sdk-java:1.6.0`(jitpack)을 쓰고 Spring `oauth2-client`는 쓰지 않는다. DataGSM Redirect URI는 백엔드 `/api/v1/auth/callback`이다. 인증을 포함한 모든 서버 API는 `/api/v1` prefix를 붙인다. |
+| DEC-017 | 확정 · 팀 · 2026-09-27 | DEC-015 중 커밋 메시지 형식을 `type: 설명`(type 소문자)으로 바꾼다. PR 제목은 `[type] 설명`을 유지한다. 이미 push된 커밋은 재작성하지 않는다. [Git·PR 컨벤션](conventions.md)에 반영. |
 
 ## 하네스 선택
 
