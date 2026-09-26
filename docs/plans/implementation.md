@@ -17,7 +17,7 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 
 | API 그룹 | 계획 파일 | API 범위 | 담당자 | 상태 |
 | --- | --- | --- | --- | --- |
-| 인증 | [auth.md](auth.md) | `/api/v1/auth/*` | 강민우 | 미착수 |
+| 인증 | [auth.md](auth.md) | `/api/v1/auth/*` | 강민우 | 진행 중 (`feat/datagsm-oauth`) |
 | 상태 확인 | [health-check.md](health-check.md) | `/api/v1/health` | 김준수 | 미착수 |
 | 학생·출석 | [student-attendance.md](student-attendance.md) | `/api/v1/student`, `/api/v1/attend` | 김준수 | 미착수 |
 | 호실 명단 | [room-roster.md](room-roster.md) | `/api/v1/room/student` | 임서하 | 미착수 |
@@ -50,7 +50,7 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
   - `dormitoryRoom ← student.dormitoryRoom`
   - `accountStatus ← userinfo.status`
   - `subjectType ← userinfo.objectType`
-- `STUDENT`는 `student.role ∈ {DORMITORY_MANAGER, STUDENT_COUNCIL}`, `TEACHER`는 `teacher.department == DORMITORY`일 때만 서비스 관리자다.
+- `STUDENT`는 `student.role == DORMITORY_MANAGER`, `TEACHER`는 `teacher.department == DORMITORY`일 때만 서비스 관리자다.
 - `status != ACTIVE`, `objectType`와 중첩 객체 불일치, 지원하지 않는 사용자 유형은 인증 실패로 처리한다.
 - AI `recognition.studentId`는 백엔드 canonical `studentId` 계약을 유지하고, `UNKNOWN`은 `studentId: null`로 전달한다.
 - `userinfo`를 전체 학생 명단으로 사용하지 않는다. 학생 OpenAPI의 실제 권한·페이지네이션·졸업/전학/퇴사 신호를 연동 검증으로 남긴다.
@@ -69,7 +69,7 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 6. 공지 CRUD·내부 알림 API가 없다.
 7. 호실 API는 단일 호실 조회만 정의해 관리자 층 전개도 전체 조회를 직접 지원하지 않는다.
 8. webhook의 event 값, 서명 방식, old/new 실제 필드, 재전송 idempotency가 미정이다.
-9. 인증 JSON 예시의 쉼표, `RefreshToken` 헤더 규칙, 공통 오류 envelope가 정리되지 않았다.
+9. 공통 오류 envelope가 정해지지 않았다. 모든 API는 `/api/v1` prefix를 붙인다. 인증은 세션 쿠키 방식으로 정해져 `RefreshToken` 헤더는 쓰지 않는다(DEC-016).
 10. 봉사 증가·차감 API의 재시도 idempotency와 0회 하한 검증을 구현 계약에 반영한다. UI 노출은 SRC-NOTION-CHECKUPZIP 승인으로 `+ / −` 모두 확정됐다.
 
 없는 경로를 임의로 구현하지 않고, 제공자·소비자·관련 REQ·수용 시나리오를 정한 뒤 `contracts/`에 반영한다.
@@ -102,5 +102,6 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 | 2026-09-24 | Notion ZIP 항목 3개 사용자 승인 반영 | 얼굴 자동 촬영, 관리자 휴대폰 5탭, 봉사 횟수 `+ / −`를 출처·명세·수용 시나리오·분야별 계획에 반영. 제품 코드는 미구현. 이번 변경 뒤 자동 검사는 실행하지 않음. |
 | 2026-09-26 | DataGSM 연동 구조 수정안 반영 | userinfo 중첩 매핑·권한 판정·OAuth state 분리·학생 OpenAPI 경계와 수용 시나리오 갱신 |
 | 2026-09-26 | `npm run harness:check` | 하네스 문서 검사 및 테스트 통과, 제품 서비스는 미구현 |
+| 2026-09-27 | DataGSM 인증 구현 내용 반영 | 서버 세션 방식 DEC-016, 인증 경로·계약·환경변수·도메인 모델 갱신. 명세와 다른 코드 부분은 auth.md에 기록. 서버 인증 자동 테스트는 없음 |
 
 현재 변경은 명세·계획 문서뿐이며 제품 API·웹·AI·배포 구현은 수행하지 않았다.

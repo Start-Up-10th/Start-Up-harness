@@ -11,7 +11,7 @@
 Spring API ── DataGsmOAuthClient ── DataGSM OAuth/userinfo
         └── DataGsmStudentClient ── DataGSM 학생 OpenAPI
    │    │
-   │    └── Redis: 만료 세션·QR·일시 처리 상태
+   │    └── Redis: 로그인 세션·OAuth state·QR·일시 처리 상태
    ├── PostgreSQL: 학생·동의·벡터 참조·현재 출석·공지·봉사
    └── FastAPI: MediaPipe 검출/정렬 + 검증된 신원 임베딩 모델
 ```
@@ -30,7 +30,8 @@ Claude와 Codex의 차이는 진입 파일/스킬 검색 경로에 한정한다.
 
 | 개념 | 필수 의미 |
 | --- | --- |
-| Student | 검증된 DataGSM 식별자·이름·학년·호실 |
+| Member | DataGSM 최상위 `id`, 이름, 서비스 역할(`STUDENT`/`ADMIN`). 학생·교사 공통 로그인 주체 |
+| Student | Member 1:1. 학년·반·번호·학번·호실 |
 | Consent | 필수 두 항목, 공지 알림 선택과 동의 버전/시각 |
 | FaceTemplate | 학생별 약 20개 대표 임베딩, 모델 버전; 원본 없음 |
 | RecognitionSession | 관리자·기기·페이지·용도·수명 |

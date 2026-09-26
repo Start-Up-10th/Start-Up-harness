@@ -6,6 +6,13 @@
 백엔드 첫 기능 구현 시 실제 OpenAPI 계약을 이 폴더에 생성하고 웹/AI 담당자와 공유한다.
 빈 OpenAPI 파일로 계약이 완료됐다고 처리하지 않는다.
 
+## 인증 (구현됨)
+
+- 로그인 상태는 `SESSION` 쿠키로 전달한다(DEC-016). 웹은 `credentials: 'include'`로 요청한다. `Authorization`·`RefreshToken` 헤더는 쓰지 않는다.
+- `GET /api/v1/auth/login`, `GET /api/v1/auth/callback`, `GET /api/v1/auth/me`, `POST /api/v1/auth/logout`. 세부는 [인증 계획](../docs/plans/auth.md).
+- 상태 코드: 400 = `oauthState` 없음·만료·재사용, 401 = 비로그인, 403 = 권한 없음·비활성 계정, 로그아웃 성공 = 204.
+- 공통 오류 envelope는 아직 없다.
+
 계약에 반드시 표현할 내용:
 
 - OAuth 세션의 사용자 역할, 동의/등록 완료 상태, 본인 데이터 범위.
