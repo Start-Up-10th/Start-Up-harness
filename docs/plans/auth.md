@@ -9,7 +9,7 @@
 - `POST /api/v1/auth/logout` — 세션 무효화, `SESSION` 쿠키 삭제, 204
 
 인증은 서버 세션 방식이다([DEC-016](../decisions.md)). JWT·refresh token·재발급 API는 두지 않는다.
-모든 서버 API는 `/api/v1` prefix를 붙인다. 현재 서버 코드는 `/auth/*`라 경로와 DataGSM에 등록한 Redirect URI를 함께 바꿔야 한다.
+모든 서버 API는 `/api/v1` prefix를 붙인다.
 
 ## 구현 현황 (`feat/datagsm-oauth`)
 
@@ -18,20 +18,19 @@
 - state가 없거나 만료·재사용이면 400
 - `status != ACTIVE`, 학생인데 `student` 또는 `student.role`이 없음, 기숙사부가 아닌 교사, 지원하지 않는 `objectType`은 403
 - 역할 판정: 학생 `DORMITORY_MANAGER`(기숙사 자치위원)와 교사 `DORMITORY`는 `ADMIN`, 학생회(`STUDENT_COUNCIL`)를 포함한 그 외 활성 학생은 `STUDENT`
-- 로그인 시 `member`(`datagsm_id`=최상위 `id`, 이름, 역할)와 `student`(학년, 반, 번호, 학번, 호실)를 저장·갱신
+- 로그인 시 `member`(`datagsm_id`=최상위 `id`, 이름, 역할)와 `student`(`datagsm_student_id`=`student.id`, 학년, 반, 번호, 학번, 호실)를 저장·갱신
 - 로그인 시 기존 세션을 무효화하고 새 세션에 회원 id와 역할을 저장해 세션 고정을 막음
 - `/api/v1/auth/me`는 현재 `name`, `role`만 반환
 
 ## 명세와 다른 부분
 
-- [ ] `student.id`(canonical `studentId`)를 저장하지 않는다. REQ-AUTH-002 매핑과 맞춰야 한다.
 - [ ] 권한 부족 문구가 `이용 권한이 없는 계정입니다.`다. REQ-AUTH-003 문구는 `관리자 권한이 없는 계정입니다.`다.
 - [ ] `/api/v1/auth/me`에 학생 ID·학번·호실·동의/얼굴 등록 상태가 없다.
 - [ ] callback이 JSON을 반환한다. 로그인 후 웹 화면으로 복귀하는 흐름을 정해야 한다.
 
 ## 남은 작업
 
-- [ ] 서버 경로를 `/api/v1/auth/*`로 변경하고 DataGSM Redirect URI 재등록
+- [ ] DataGSM 콘솔의 Redirect URI를 `/api/v1/auth/callback`으로 재등록
 - [ ] 공통 오류 envelope와 `requestId`. 현재는 `ResponseStatusException` 기본 응답
 - [ ] QR 로그인 복귀 시 원래 QR의 만료·종료·용도 재검사
 - [ ] 로그아웃 시 그 사용자가 운영하던 QR·인식 세션 정리
