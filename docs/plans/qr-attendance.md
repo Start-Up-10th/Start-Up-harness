@@ -27,6 +27,24 @@
 - 휴대폰 일반 카메라로 찍으면 학생 웹 `/qr`이 열리고, 페이지가 `#t=`를 읽어 바로 스캔 API를 호출한다.
 - 웹 내부 QR 카메라는 읽은 URL에서 `#t=` 뒤의 토큰만 꺼내 같은 스캔 API를 호출한다. 형식이 다르면 호출하지 않고 `INVALID`로 표시한다.
 
+## 관리자 API 응답
+
+- `POST /api/v1/qr` 요청: `{ "purpose": "DORMITORY" | "STUDY_ROOM" }`
+- `POST /api/v1/qr`, `POST /api/v1/qr/{sessionId}/heartbeat` 응답:
+
+| 필드 | 의미 |
+| --- | --- |
+| `sessionId` | 이 페이지의 QR 세션 ID. heartbeat·close에 쓴다. |
+| `purpose` | 출석 용도 |
+| `qrUrl` | QR로 그릴 값. 위 QR 값 형식의 URL이다. |
+| `tokenExpiresAt` | 현재 토큰 만료 시각. `남은 유효 시간` 카운트다운 기준이다. |
+| `leaseExpiresAt` | 다음 heartbeat가 없으면 세션이 끝나는 시각 |
+| `serverTime` | 응답 시점 서버 시각. 브라우저 시계 오차 보정에 쓴다. |
+
+- heartbeat에서 세션이 없거나 lease가 끝났거나 다른 관리자의 세션이면 404를 반환한다. 웹은 `POST /api/v1/qr`로 새 세션을 만든다.
+- close는 성공·이미 종료 모두 204를 반환한다.
+- 웹 주소는 서버 설정값으로 둔다. 관리자 웹은 `qrUrl`을 그대로 QR로 그리며 URL을 조립하지 않는다.
+
 ## 계약 보완
 
 - [ ] `uuid`, `exp`에 목적·세션 격리·lease를 연결할 방법을 정한다.
