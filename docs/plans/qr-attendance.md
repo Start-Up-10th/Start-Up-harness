@@ -90,6 +90,14 @@ QR이 출석을 처음 기록하는 기능이라 QR 작업에서 마이그레이
 - `member`가 아닌 `student`를 참조한다. 출석 대상은 학생뿐이다.
 - 현재 상태(`attended`)와 최초 인증 시각(`first_verified_at`)을 분리한다(REQ-ATT-006).
 
+저장 규칙:
+
+- 자동 인증(QR·얼굴)은 `INSERT … ON CONFLICT (student_id, purpose, operating_day)`로 원자적으로 처리한다. Redis만으로 중복을 막지 않는다.
+- 행이 없으면 `attended = true`로 만들고 `APPROVED`, 이미 `attended = true`면 바꾸지 않고 `DUPLICATE`다.
+- `first_verified_at`은 가장 이른 유효 인증 시각만 남긴다.
+- 수동으로 미출석이 된 행은 `manual_updated_at` 이후 발생한 유효 인증만 다시 출석으로 바꾼다. 그 이전에 발생해 늦게 도착한 이벤트는 무시한다(DEC-008).
+- 08:00 이후 전날 행 정리는 학생·출석 조회 계획(REQ-ATT-007)에서 담당한다.
+
 ## 계약 보완
 
 - [x] `uuid`, `exp`에 목적·세션 격리·lease를 연결할 방법을 정한다. `sessionId`·`qrUrl`·`tokenExpiresAt`·`leaseExpiresAt`으로 대체했다.
