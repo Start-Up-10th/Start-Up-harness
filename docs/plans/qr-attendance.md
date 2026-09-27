@@ -73,7 +73,7 @@
 
 ## 계약 보완
 
-- [ ] `uuid`, `exp`에 목적·세션 격리·lease를 연결할 방법을 정한다.
+- [x] `uuid`, `exp`에 목적·세션 격리·lease를 연결할 방법을 정한다. `sessionId`·`qrUrl`·`tokenExpiresAt`·`leaseExpiresAt`으로 대체했다.
 - [x] 페이지 이탈 종료, heartbeat, 강제 종료 후 서버 lease 만료 계약을 보완한다. heartbeat·close 경로를 추가했고 lease·heartbeat 간격은 구현에서 설정값으로 정한다.
 - [ ] 스캔에서 인증 사용자·세션 상태·purpose·운영일을 재검증한다.
 - [ ] 관리자 호실 수동 출석 저장 API 부재를 별도 계약 항목으로 남긴다.
