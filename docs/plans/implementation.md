@@ -61,8 +61,8 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 
 ## API 문서와 제품 명세의 보완 목록
 
-1. QR 발급 문서에 `purpose`, 독립 세션 ID, lease/heartbeat, 종료, 15분 갱신이 없다.
-2. QR 출석 문서에 운영일·중복 결과·현재 사용자 범위가 없다.
+1. QR 발급 문서에 `purpose`, 독립 세션 ID, lease/heartbeat, 종료, 15분 갱신이 없다. → [qr-attendance.md](qr-attendance.md) 관리자 API 응답에 반영했다.
+2. QR 출석 문서에 운영일·중복 결과·현재 사용자 범위가 없다. → [qr-attendance.md](qr-attendance.md) 스캔 API에 반영했다.
 3. 얼굴 감지는 `GET` + `File[]` body이며 단일 `student_id`·`success`만 반환해 다수 얼굴·unknown·점수·모델 정보를 표현하지 못한다.
 4. 얼굴 인식 결과의 출석 확정·오프라인 임시 기록 동기화 API가 없다.
 5. 관리자 호실 수동 출석 저장 API가 없다.
