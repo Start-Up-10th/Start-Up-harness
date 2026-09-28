@@ -75,14 +75,14 @@
 | 관리자 웹 QR 화면 | 관리자 웹 담당 | `qrUrl`을 QR로 표시, 약 20초마다 heartbeat, 이탈·탭 변경 시 close |
 | 로그인 복귀 | 인증 담당 | 미로그인 학생이 로그인 후 원래 `/qr#t=…`로 돌아오게 콜백 리다이렉트 처리 |
 
-## 출석 테이블 제안 (QR·얼굴·조회 공유)
+## 출석 테이블 (QR·얼굴·조회 공유)
 
-QR이 출석을 처음 기록하는 기능이라 QR 작업에서 마이그레이션을 만든다. 학생·출석 조회와 얼굴 인식도 같은 테이블을 쓴다. 합의 전까지는 제안이다.
+QR이 출석을 처음 기록하는 기능이라 QR 작업에서 만들었다(서버 `V3__create_attendance.sql`, CheckUp-server#37). 학생·출석 조회와 얼굴 인식도 같은 테이블을 쓴다. 전체 ERD는 프로젝트 마무리 때 팀에서 맞춘다.
 
 | 컬럼 | 타입 | 의미 |
 | --- | --- | --- |
 | `id` | `BIGSERIAL` | PK |
-| `student_id` | `BIGINT NOT NULL` → `student(id)` | 출석 대상 학생 |
+| `student_id` | `BIGINT NOT NULL` → `student(id)` `ON DELETE CASCADE` | 출석 대상 학생. 학생이 삭제되면 당일 출석도 함께 삭제된다. |
 | `purpose` | `VARCHAR(20) NOT NULL` | `DORMITORY` / `STUDY_ROOM` |
 | `operating_day` | `DATE NOT NULL` | 08:00 KST 기준 운영일(DEC-006) |
 | `attended` | `BOOLEAN NOT NULL` | 현재 상태. 수동 미출석이면 false |
@@ -92,6 +92,7 @@ QR이 출석을 처음 기록하는 기능이라 QR 작업에서 마이그레이
 
 - `UNIQUE (student_id, purpose, operating_day)`: 학생·용도·운영일당 한 행이다(REQ-ATT-002).
 - `member`가 아닌 `student`를 참조한다. 출석 대상은 학생뿐이다.
+- `idx_attendance_operating_day`: 08:00 정리와 운영일별 조회용 인덱스다.
 - 현재 상태(`attended`)와 최초 인증 시각(`first_verified_at`)을 분리한다(REQ-ATT-006).
 
 저장 규칙:
