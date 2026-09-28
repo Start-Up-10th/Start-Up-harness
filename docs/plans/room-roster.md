@@ -42,3 +42,5 @@
 - 전체 DataGSM 명단 동기화 전에는 조회 범위가 서버 DB에 저장된 학생으로 제한된다.
 - 2026-09-28 PR #41 CI 통합 검증: `develop`의 출석 테이블 migration과 호실 컬럼 변경이 모두 `V3`여서 병합 결과에서 `Found more than one migration with version 3`를 재현했다. 최신 `develop`을 반영하고 호실 migration을 `V4`로 옮겼다. SQL 내용과 기존 출석 migration은 유지했다.
 - 수정 후 별도 PostgreSQL 17·Redis 7에서 `./gradlew.bat clean build` 통과: 17개 테스트 클래스, 91개 테스트, 실패·오류·건너뜀 0개. 기존 로컬 DB의 migration 이력은 변경하지 않았다.
+- 2026-09-28 PR #41 리뷰 반영: 이번 기능에서 추가한 5개 테스트 클래스의 17개 테스트에 한국어 `@DisplayName`을 추가하고 `Student.getDormitoryFloor()`의 JavaDoc을 한국어로 작성했다. PR 제목을 `[feat] 호실 학생 명단 조회 API`로 맞추고 작성자 `Ims2oha`를 담당자로 지정했다.
+- 리뷰 반영 후 새 PostgreSQL 17·Redis 7 환경에서 `./gradlew.bat clean build`를 실행해 91개 테스트가 통과했다(실패·오류·건너뜀 0개).

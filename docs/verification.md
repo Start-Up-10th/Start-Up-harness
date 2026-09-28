@@ -77,3 +77,10 @@ Claude 실행·두 도구의 별도 새 세션 작업, GitHub Actions 원격 실
 - 수정 검증: 서버 저장소에서 `./gradlew.bat clean build` 통과. Java 25, 별도 PostgreSQL 17·Redis 7 컨테이너를 사용했고 테스트 91개(17개 클래스), 실패·오류·건너뜀 0개였다.
 - 환경: `DB_URL=jdbc:postgresql://localhost:15433/checkup`, `REDIS_PORT=16379`, CI와 동일한 테스트용 DataGSM 값과 `PUBLIC_ORIGIN=http://localhost:3000`을 주입했다. 테스트 DB에는 migration 1·2·3·4가 모두 성공으로 기록됐다.
 - 기존 개발 DB·Redis와 migration 이력은 변경하지 않았다. 학교 OAuth·카메라·운영 배포는 이 검사의 범위가 아니다.
+
+## 2026-09-28 서버 호실 API 리뷰 반영 검증
+
+- 대상: CheckUp-server `feat/room-roster`, [PR #41](https://github.com/Start-Up-10th/CheckUp-server/pull/41).
+- 변경: 기능에 추가한 테스트 17개 모두에 한국어 `@DisplayName`을 작성하고 층 계산 JavaDoc을 한국어로 정리했다. PR 제목과 담당자도 리뷰 의견에 맞춰 설정했다.
+- 서버 저장소에서 `./gradlew.bat clean build` 통과: 17개 클래스, 91개 테스트, 실패·오류·건너뜀 0개.
+- 환경: Java 25, 새 PostgreSQL 17·Redis 7 컨테이너, `DB_URL=jdbc:postgresql://localhost:15433/checkup`, `REDIS_PORT=16379`. CI 테스트용 DataGSM 설정과 `PUBLIC_ORIGIN=http://localhost:3000`을 주입했다.
