@@ -40,3 +40,5 @@
 - `./gradlew.bat build` — Java 25, PostgreSQL 17, Redis 7에서 통과. 컨트롤러·서비스·JPA 저장소·DataGSM 저장/갱신 및 전체 회귀 테스트 통과.
 - `npm run harness:check` — 38 REQ, 39 시나리오, 하네스 자체 검사 20/20 통과. 제품 시나리오는 실행 증빙과 분리하여 `specified` 상태를 유지한다.
 - 전체 DataGSM 명단 동기화 전에는 조회 범위가 서버 DB에 저장된 학생으로 제한된다.
+- 2026-09-28 PR #41 CI 통합 검증: `develop`의 출석 테이블 migration과 호실 컬럼 변경이 모두 `V3`여서 병합 결과에서 `Found more than one migration with version 3`를 재현했다. 최신 `develop`을 반영하고 호실 migration을 `V4`로 옮겼다. SQL 내용과 기존 출석 migration은 유지했다.
+- 수정 후 별도 PostgreSQL 17·Redis 7에서 `./gradlew.bat clean build` 통과: 17개 테스트 클래스, 91개 테스트, 실패·오류·건너뜀 0개. 기존 로컬 DB의 migration 이력은 변경하지 않았다.

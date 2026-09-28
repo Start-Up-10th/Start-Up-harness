@@ -105,5 +105,6 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 | 2026-09-27 | DataGSM 인증 구현 내용 반영 | 서버 세션 방식 DEC-016, 인증 경로·계약·환경변수·도메인 모델 갱신. 명세와 다른 코드 부분은 auth.md에 기록. 서버 인증 자동 테스트는 없음 |
 | 2026-09-27 | 서버 인증 테스트·CI 수정 | 서버 `AuthServiceTest` 역할 판정 11개 통과, Server CI에 테스트용 DataGSM 환경변수 추가 후 통과. 웹훅 권한 반영(#25)과 로그인 후 복귀(#26)는 서버 이슈로 분리 |
 | 2026-09-28 | 호실 명단 API 구현·검증 | `feat/room-roster`: SESSION 권한 검사·정렬된 DB 명단·`dormitory_room` migration·OpenAPI 구현. Java 25, PostgreSQL 17, Redis 7에서 `./gradlew.bat build` 통과; 하네스 `npm run harness:check` 및 20개 자체 검사 통과. 전체 학생 명단 동기화는 별도 작업 |
+| 2026-09-28 | 호실 API PR CI 통합 오류 수정 | PR #41 병합 결과에서 출석·호실 migration의 `V3` 중복을 재현. 최신 `develop` 반영 후 호실 migration을 `V4`로 옮겨 별도 PostgreSQL 17·Redis 7에서 `./gradlew.bat clean build` 통과(91개 테스트). 기존 로컬 DB 이력은 변경하지 않음 |
 
 호실 명단 Spring API는 구현됐다. 전체 DataGSM 명단 동기화, 웹·AI·배포 기능은 별도 작업이다.

@@ -68,3 +68,12 @@ GitHub Actions의 조건부 건너뜀은 required check에서도 성공 상태�
 Claude 실행·두 도구의 별도 새 세션 작업, GitHub Actions 원격 실행, DataGSM, 카메라, GSM SV 배포는 로컬 하네스 검사 대상이 아니다.
 마지막 로컬 검사 결과는 [개발 계획](plans/implementation.md)에 남긴다.
 2026-09-23의 외부 사례 비교·로컬 재현 결과와 미검증 범위는 [하네스 평가](reviews/harness-assessment-2026-09-23.md)에 기록한다.
+
+## 2026-09-28 서버 호실 API CI 통합 검증
+
+- 대상: CheckUp-server `feat/room-roster`, [PR #41](https://github.com/Start-Up-10th/CheckUp-server/pull/41).
+- 실패 재현: PR 병합 ref `c3e0854`에서 `./gradlew.bat test --tests com.checkup.checkup.CheckupApplicationTests`를 실행하자 `Found more than one migration with version 3`로 실패했다. `develop`의 `V3__create_attendance.sql`과 기능 브랜치의 호실 컬럼 변경 migration이 중복됐다.
+- 수정: 최신 `develop`을 반영하고 호실 컬럼 변경 migration을 `V4__rename_student_room_to_dormitory_room.sql`로 옮겼다. SQL과 출석 migration은 유지했다.
+- 수정 검증: 서버 저장소에서 `./gradlew.bat clean build` 통과. Java 25, 별도 PostgreSQL 17·Redis 7 컨테이너를 사용했고 테스트 91개(17개 클래스), 실패·오류·건너뜀 0개였다.
+- 환경: `DB_URL=jdbc:postgresql://localhost:15433/checkup`, `REDIS_PORT=16379`, CI와 동일한 테스트용 DataGSM 값과 `PUBLIC_ORIGIN=http://localhost:3000`을 주입했다. 테스트 DB에는 migration 1·2·3·4가 모두 성공으로 기록됐다.
+- 기존 개발 DB·Redis와 migration 이력은 변경하지 않았다. 학교 OAuth·카메라·운영 배포는 이 검사의 범위가 아니다.
