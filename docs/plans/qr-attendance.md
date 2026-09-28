@@ -97,11 +97,22 @@ QR이 출석을 처음 기록하는 기능이라 QR 작업에서 만들었다(�
 
 저장 규칙:
 
-- 자동 인증(QR·얼굴)은 `INSERT … ON CONFLICT (student_id, purpose, operating_day)`로 원자적으로 처리한다. Redis만으로 중복을 막지 않는다.
-- 행이 없으면 `attended = true`로 만들고 `APPROVED`, 이미 `attended = true`면 바꾸지 않고 `DUPLICATE`다.
+- 출석은 서버 내부 `AttendanceService.markAttended(studentId, purpose, verifiedAt, method)`로만 기록한다. 이 기능 자체에는 HTTP API가 없고, QR 스캔·얼굴 인식이 인증 성공 뒤 호출한다.
+- 운영일은 호출하는 쪽이 넘기지 않고 `verifiedAt`으로 계산한다.
+- 자동 인증은 `INSERT … ON CONFLICT (student_id, purpose, operating_day)`로 원자적으로 처리한다. Redis만으로 중복을 막지 않는다.
 - `first_verified_at`은 가장 이른 유효 인증 시각만 남긴다.
-- 수동으로 미출석이 된 행은 `manual_updated_at` 이후 발생한 유효 인증만 다시 출석으로 바꾼다. 그 이전에 발생해 늦게 도착한 이벤트는 무시한다(DEC-008).
+
+| 결과 | 조건 | QR 스캔 결과 |
+| --- | --- | --- |
+| `RECORDED` | 새로 출석 처리 | `APPROVED` |
+| `ALREADY_ATTENDED` | 이미 출석 상태 | `DUPLICATE` |
+| `SUPERSEDED_BY_MANUAL` | 수동 미출석(`manual_updated_at`) 이전에 발생해 늦게 도착한 인증 (DEC-008) | `DUPLICATE` |
+| `STALE` | `verifiedAt`의 운영일이 오늘이 아님. 08:00 이전 이벤트 재전송으로 전날 기록을 되살리지 않는다 (REQ-ATT-007) | `EXPIRED` |
+| `FUTURE` | `verifiedAt`이 서버 시각보다 5초 넘게 늦음. 5초 이내면 서버 현재 시각으로 낮춰 기록한다 (REQ-ATT-002 시계 보정) | `INVALID` |
+
+- QR은 서버 현재 시각으로 기록하므로 `STALE`·`FUTURE`·`SUPERSEDED_BY_MANUAL`은 실제로 나오지 않는다. 얼굴 오프라인 동기화 대비다.
 - 08:00 이후 전날 행 정리는 학생·출석 조회 계획(REQ-ATT-007)에서 담당한다.
+- 관리자 수동 출석 저장 API는 아직 없다. 생기면 `manual_updated_at`을 채우고 같은 테이블을 쓴다.
 
 ## 계약 보완
 
