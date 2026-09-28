@@ -1,0 +1,104 @@
+openapi: 3.1.0
+info:
+  title: CheckUp Room Roster API
+  version: 1.0.0
+  description: Reads the students currently stored in a dormitory room.
+servers:
+  - url: /
+paths:
+  /api/v1/room/student:
+    get:
+      operationId: getRoomStudents
+      summary: Get students assigned to a room
+      description: >-
+        Administrators may query any room. Students may query only their currently assigned room.
+        The response contains students currently stored in the server database; it is not a live
+        DataGSM directory lookup. Results are ordered by student name, display student number, then
+        internal student identifier for a stable order when names and numbers match.
+      security:
+        - SessionCookie: []
+      parameters:
+        - name: dormitoryRoom
+          in: query
+          required: true
+          description: Positive dormitory room number, for example 301.
+          schema:
+            type: integer
+            minimum: 1
+          example: 301
+      responses:
+        '200':
+          description: Students currently assigned to the requested room.
+          content:
+            application/json:
+              schema:
+                type: array
+                minItems: 1
+                items:
+                  $ref: '#/components/schemas/RoomStudent'
+              example:
+                - student_name: 학생A
+                  student_class: 1
+                  student_number: 1101
+        '400':
+          description: The room query parameter is missing, is not an integer, or is not positive.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: The session is missing or expired, or the member no longer exists.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: The student requested another room or student/room roster information is missing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  securitySchemes:
+    SessionCookie:
+      type: apiKey
+      in: cookie
+      name: SESSION
+  schemas:
+    RoomStudent:
+      type: object
+      required:
+        - student_name
+        - student_class
+        - student_number
+      properties:
+        student_name:
+          type: string
+        student_class:
+          type: integer
+          description: Class number.
+        student_number:
+          type: integer
+          description: Display student number.
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: object
+            required:
+              - field
+              - reason
+            properties:
+              field:
+                type: string
+              reason:
+                type: string

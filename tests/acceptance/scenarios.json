@@ -109,6 +109,28 @@
       "evidence": []
     },
     {
+      "id": "ACC-ROOM-001",
+      "requirements": [
+        "REQ-AUTH-002",
+        "REQ-AUTH-003",
+        "REQ-UI-002"
+      ],
+      "title": "인증된 호실 학생 명단 API",
+      "given": "DB에 호실이 배정된 학생·다른 호실 학생·관리자·미로그인 사용자",
+      "when": "GET /api/v1/room/student?dormitoryRoom=301을 요청한다",
+      "then": [
+        "SESSION 미인증·만료는 401, 호실 파라미터 누락·숫자 오류·0 이하는 400이다",
+        "학생은 자기 호실만 조회하며 타 호실·미배정·학생 정보 없음은 명단 조회 전에 403이다",
+        "DB의 현재 관리자 역할은 학생 정보 없이도 모든 호실을 조회한다",
+        "응답은 student_name, 정수 student_class, 표시용 정수 student_number를 담은 배열이며 이름·학번·내부 ID 순이다",
+        "호실이 비어 있으면 403이며 응답 인원 수는 4명으로 제한하지 않는다",
+        "응답 범위는 로컬 DB에 동기화된 학생으로 한정되고 전체 DataGSM 명단 동기화를 완료로 표시하지 않는다"
+      ],
+      "status": "specified",
+      "implementation": [],
+      "evidence": []
+    },
+    {
       "id": "ACC-AUTH-004",
       "requirements": [
         "REQ-AUTH-004"

@@ -31,7 +31,7 @@ QR 스캔 후 로그인할 때 인증 대상의 용도와 QR 정보를 보존하
 | `student.id` | 내부 canonical `studentId` |
 | `student.studentNumber` | `studentNumber`(화면 표시용 학번) |
 | `student.name` 또는 `teacher.name` | `name` |
-| `student.dormitoryRoom` | `dormitoryRoom` |
+| `student.dormitoryRoom` | `dormitoryRoom`; derived floor is `dormitoryFloor` |
 | 최상위 `status` | `accountStatus` |
 | 최상위 `objectType` | `subjectType` |
 | `student.role` | 학생 관리자 권한 판정 |
@@ -50,7 +50,7 @@ DataGSM 원본 DTO의 숫자형 `id`는 원본 경계에서 `Long`으로 처리�
 교사는 학생 식별자와 호실을 갖지 않으며 `name`, `accountStatus`를 매핑한다.
 `accountStatus`와 `subjectType`은 로그인할 때 검증에 쓰며 DB에 저장하지 않는다.
 
-층은 유효한 `dormitoryRoom`의 `floor(dormitoryRoom / 100)`으로 계산한다. 소수 나눗셈 결과를 층으로 쓰지 않는다.
+층은 유효한 `dormitoryRoom`의 `floor(dormitoryRoom / 100)`으로 계산해 `dormitoryFloor`로 제공한다. 소수 나눗셈 결과를 층으로 쓰지 않는다. 별도 층 필드는 저장하지 않는다.
 전체 학생은 기숙사생이다. 호실 구성과 인원은 DataGSM 배정 정보를 기준으로 만든다.
 `userinfo`는 현재 로그인한 한 명의 정보만 반환하므로 전체 학생 명단으로 사용하지 않는다.
 전체 학생·호실 명단은 별도 학생 API `GET https://openapi.datagsm.kr/v1/students`를

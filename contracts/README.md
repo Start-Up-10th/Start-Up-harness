@@ -1,9 +1,9 @@
 # 서비스 간 계약
 
 제품 정책은 [명세](../docs/spec/index.md), 기술 경계는 [아키텍처](../docs/architecture.md)를 따른다.
-현재 확정된 공개 API는 DataGSM 사용자가 제공한 엔드포인트뿐이다. 내부 REST 경로와 schema는 아직 없다.
+서비스 간 내부 REST 계약은 각 기능이 구현될 때 OpenAPI로 기록한다. DataGSM 외부 계약은 사용자가 제공한 경로와 실제 연동 확인 범위로 제한한다.
 
-백엔드 첫 기능 구현 시 실제 OpenAPI 계약을 이 폴더에 생성하고 웹/AI 담당자와 공유한다.
+백엔드 기능별로 실제 OpenAPI 계약을 이 폴더에 추가하고 웹/AI 담당자와 공유한다. 첫 계약은 호실 명단이다.
 빈 OpenAPI 파일로 계약이 완료됐다고 처리하지 않는다.
 
 ## 인증 (구현됨)
@@ -11,7 +11,14 @@
 - 로그인 상태는 `SESSION` 쿠키로 전달한다(DEC-016). 웹은 `credentials: 'include'`로 요청한다. `Authorization`·`RefreshToken` 헤더는 쓰지 않는다.
 - `GET /api/v1/auth/login`, `GET /api/v1/auth/callback`, `GET /api/v1/auth/me`, `POST /api/v1/auth/logout`. 세부는 [인증 계획](../docs/plans/auth.md).
 - 상태 코드: 400 = `oauthState` 없음·만료·재사용, 401 = 비로그인, 403 = 권한 없음·비활성 계정, 로그아웃 성공 = 204.
-- 공통 오류 envelope는 아직 없다.
+- 인증 필터의 비로그인 401에는 응답 본문이 없다. 서비스에서 발생한 오류는 기존 `ErrorResponse` 형식을 사용하며 모든 API에 대한 전역 envelope는 아직 정하지 않았다.
+
+## 호실 명단 (구현됨)
+
+- [호실 명단 OpenAPI](room-roster.openapi.yaml): `GET /api/v1/room/student?dormitoryRoom=301`.
+- `SESSION` 쿠키 인증. 관리자는 모든 호실, 학생은 DB에 배정된 본인 호실만 조회한다. 비로그인은 401, 잘못된 호실 파라미터는 400, 권한 부족·학생 정보/호실 명단 없음은 403이다.
+- 응답은 `student_name`, 반 번호 정수 `student_class`, 표시용 학번 정수 `student_number`를 담은 배열이다.
+- 제공 데이터는 현재 서버 PostgreSQL에 저장된 학생 범위다. 전체 명단은 별도 DataGSM 학생 API 동기화가 완료되기 전까지 제공되지 않을 수 있다.
 
 계약에 반드시 표현할 내용:
 

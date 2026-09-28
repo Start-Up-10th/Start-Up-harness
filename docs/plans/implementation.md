@@ -3,7 +3,7 @@
 ## 현재 상태
 
 - 하네스와 제품 명세 정리는 완료됐다.
-- 제품 웹·Spring·FastAPI·운영 서비스와 실제 API 구현은 아직 시작하지 않았다.
+- 제품 전체는 미완성이며, Spring의 인증·QR에 이어 호실 명단 API 구현을 진행 중이다. 웹·FastAPI·운영 서비스는 미구현이다.
 - `API명세서/API명세서`의 API 문서는 모두 `시작 전`이다.
 - 계획은 API 그룹별 파일로 나누고, 파일명은 기능을 설명하는 이름으로 정한다.
 
@@ -20,7 +20,7 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 | 인증 | [auth.md](auth.md) | `/api/v1/auth/*` | 강민우 | 진행 중 (`feat/datagsm-oauth`) |
 | 상태 확인 | [health-check.md](health-check.md) | `/api/v1/health` | 김준수 | 미착수 |
 | 학생·출석 | [student-attendance.md](student-attendance.md) | `/api/v1/student`, `/api/v1/attend` | 김준수 | 미착수 |
-| 호실 명단 | [room-roster.md](room-roster.md) | `/api/v1/room/student` | 임서하 | 미착수 |
+| 호실 명단 | [room-roster.md](room-roster.md) | `/api/v1/room/student` | 임서하 | 구현 완료 (`feat/room-roster`; 전체 DataGSM 명단 동기화는 별도) |
 | QR 출석 | [qr-attendance.md](qr-attendance.md) | `/api/v1/qr*` | 김성찬 | 미착수 |
 | 얼굴 인식 | [face-recognition.md](face-recognition.md) | `/api/v1/face/*` | 임서하 | 미착수 |
 | 봉사 관리 | [volunteer-management.md](volunteer-management.md) | `/api/v1/volunteer/*` | 김성찬·강민우 | 미착수 |
@@ -34,7 +34,7 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 - [x] `student.role`·`teacher.department`로 서비스 관리자 권한을 판정하고 최상위 `role`은 계정 역할로만 취급한다.
 - [x] `status → accountStatus`, OAuth callback 검증값 `state → oauthState`를 분리한다.
 - [ ] DB migration, 테스트용 clock, 민감정보 없는 로그·fixture를 준비한다.
-- [ ] 실제 구현 뒤 비어 있지 않은 OpenAPI 계약을 `contracts/`에 생성한다.
+- [x] 첫 기능의 비어 있지 않은 OpenAPI 계약을 `contracts/room-roster.openapi.yaml`에 추가한다.
 - [ ] 관리자·본인·본인 호실 권한을 서버에서 검증한다.
 
 ## DataGSM 연동 구현 기준
@@ -67,7 +67,7 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 4. 얼굴 인식 결과의 출석 확정·오프라인 임시 기록 동기화 API가 없다.
 5. 관리자 호실 수동 출석 저장 API가 없다.
 6. 공지 CRUD·내부 알림 API가 없다.
-7. 호실 API는 단일 호실 조회만 정의해 관리자 층 전개도 전체 조회를 직접 지원하지 않는다.
+7. 호실 API는 단일 호실 학생 명단을 조회한다. 관리자 층 전개도 전체 조회와 DataGSM 전체 명단 동기화는 별도 작업이다.
 8. webhook의 event 값, 서명 방식, old/new 실제 필드, 재전송 idempotency가 미정이다.
 9. 공통 오류 envelope가 정해지지 않았다. 모든 API는 `/api/v1` prefix를 붙인다. 인증은 세션 쿠키 방식으로 정해져 `RefreshToken` 헤더는 쓰지 않는다(DEC-016).
 10. 봉사 증가·차감 API의 재시도 idempotency와 0회 하한 검증을 구현 계약에 반영한다. UI 노출은 SRC-NOTION-CHECKUPZIP 승인으로 `+ / −` 모두 확정됐다.
@@ -104,5 +104,6 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 | 2026-09-26 | `npm run harness:check` | 하네스 문서 검사 및 테스트 통과, 제품 서비스는 미구현 |
 | 2026-09-27 | DataGSM 인증 구현 내용 반영 | 서버 세션 방식 DEC-016, 인증 경로·계약·환경변수·도메인 모델 갱신. 명세와 다른 코드 부분은 auth.md에 기록. 서버 인증 자동 테스트는 없음 |
 | 2026-09-27 | 서버 인증 테스트·CI 수정 | 서버 `AuthServiceTest` 역할 판정 11개 통과, Server CI에 테스트용 DataGSM 환경변수 추가 후 통과. 웹훅 권한 반영(#25)과 로그인 후 복귀(#26)는 서버 이슈로 분리 |
+| 2026-09-28 | 호실 명단 API 구현·검증 | `feat/room-roster`: SESSION 권한 검사·정렬된 DB 명단·`dormitory_room` migration·OpenAPI 구현. Java 25, PostgreSQL 17, Redis 7에서 `./gradlew.bat build` 통과; 하네스 `npm run harness:check` 및 20개 자체 검사 통과. 전체 학생 명단 동기화는 별도 작업 |
 
-현재 변경은 명세·계획 문서뿐이며 제품 API·웹·AI·배포 구현은 수행하지 않았다.
+호실 명단 Spring API는 구현됐다. 전체 DataGSM 명단 동기화, 웹·AI·배포 기능은 별도 작업이다.

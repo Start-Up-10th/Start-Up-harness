@@ -18,6 +18,7 @@
 | ID | 출처 | 사용 방법 |
 | --- | --- | --- |
 | SRC-INTERVIEW | 현재 대화, `지금까지 했던 거 전부 삭제하고 처음부터 다시 질문` 이후의 사용자 결정 | 최신 텍스트 결정 우선. 핵심 발췌는 [interview-decisions.md](interview-decisions.md) |
+| SRC-USER-ROOM-API | 2026-09-28 사용자 room API 요청·화면과 후속 계약 선택 | 경로·응답 필드 초안을 제공했으며, SESSION 인증·`dormitoryRoom` GET query·학생 배열·정수 반 번호를 확정. [room-roster 계획](../plans/room-roster.md)과 OpenAPI 계약에 반영 |
 | SRC-USER-UI | 사용자 최종 첨부 a1a0d14c… | [student-ui.txt](student-ui.txt), 원문 보존 |
 | SRC-ADMIN-UI | 관리자 첨부 ea15d672… | [admin-ui.txt](admin-ui.txt), 원문 보존 |
 | SRC-QR-FACE | 사용자 메시지에 붙여넣은 최신 QR/얼굴 표 | [qr-face.md](qr-face.md), 항목별 전사 |
@@ -46,6 +47,7 @@
 | 얼굴 재등록·QR 만료 임박 알림 | 둘 다 삭제 |
 | 학생 봉사 활동 목록 | 학생은 본인 누적 횟수만 조회; 관리자 +1/-1 조정은 SRC-NOTION-CHECKUPZIP에 따라 허용 |
 | 침대 1~4·고정 4인실 | 이름순·표시 순번, DataGSM 배정 수를 분모로 사용 |
+| 초기 room API 예시의 Bearer·GET body·`student_class` enum | 후속 선택에 따라 SESSION 쿠키, `dormitoryRoom` GET query, 학생 배열, 반 번호 정수로 계약 확정 |
 | 관리자 호실 조회→편집 2단계 | 후속 호실 이미지와 결정의 직접 출석/미출석 선택+저장 |
 | 공실 UI | 빈 방 없다는 전제로 제외 |
 | 관리자 모바일 내비게이션 | SRC-NOTION-CHECKUPZIP 승인에 따라 로그아웃을 포함한 하단 5탭 |
