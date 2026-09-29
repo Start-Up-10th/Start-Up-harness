@@ -44,6 +44,7 @@
 - heartbeat에서 세션이 없거나 lease가 끝났거나 다른 관리자의 세션이면 404 `QR_SESSION_NOT_FOUND`를 반환한다. 웹은 `POST /api/v1/qr`로 새 세션을 만든다. 다른 관리자의 세션 존재 여부를 알리지 않도록 세 경우를 구분하지 않는다.
 - 관리자가 아닌 계정이 관리자 API를 호출하면 403 `ADMIN_ONLY`다. 관리자 여부는 세션 권한이 아니라 요청마다 DB의 회원 역할로 판정한다.
 - 오류 응답 본문은 공통 형식 `{ "code": "<ErrorCode>", "message": "<기본 메시지>" }`이다. 웹은 `code`로 분기한다.
+- 시각 필드(`tokenExpiresAt`, `leaseExpiresAt`, `serverTime`)는 ISO-8601 UTC 문자열이다(예: `"2026-09-27T03:15:00Z"`). 숫자(unix ms)가 아니므로 웹은 `Date.parse` 등으로 변환해 계산한다.
 - close는 성공·이미 종료 모두 204를 반환한다.
 - 웹 주소는 서버 설정값으로 둔다. 관리자 웹은 `qrUrl`을 그대로 QR로 그리며 URL을 조립하지 않는다.
 
