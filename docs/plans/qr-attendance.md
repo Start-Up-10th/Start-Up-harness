@@ -41,7 +41,9 @@
 | `leaseExpiresAt` | 다음 heartbeat가 없으면 세션이 끝나는 시각 |
 | `serverTime` | 응답 시점 서버 시각. 브라우저 시계 오차 보정에 쓴다. |
 
-- heartbeat에서 세션이 없거나 lease가 끝났거나 다른 관리자의 세션이면 404를 반환한다. 웹은 `POST /api/v1/qr`로 새 세션을 만든다.
+- heartbeat에서 세션이 없거나 lease가 끝났거나 다른 관리자의 세션이면 404 `QR_SESSION_NOT_FOUND`를 반환한다. 웹은 `POST /api/v1/qr`로 새 세션을 만든다. 다른 관리자의 세션 존재 여부를 알리지 않도록 세 경우를 구분하지 않는다.
+- 관리자가 아닌 계정이 관리자 API를 호출하면 403 `ADMIN_ONLY`다. 관리자 여부는 세션 권한이 아니라 요청마다 DB의 회원 역할로 판정한다.
+- 오류 응답 본문은 공통 형식 `{ "code": "<ErrorCode>", "message": "<기본 메시지>" }`이다. 웹은 `code`로 분기한다.
 - close는 성공·이미 종료 모두 204를 반환한다.
 - 웹 주소는 서버 설정값으로 둔다. 관리자 웹은 `qrUrl`을 그대로 QR로 그리며 URL을 조립하지 않는다.
 
@@ -60,7 +62,9 @@
 
 - 판정 순서: 토큰 존재(`INVALID`) → 토큰 만료(`EXPIRED`) → 세션 활성(`CLOSED`) → 출석 저장(`APPROVED`/`DUPLICATE`)
 - 만료된 토큰을 `INVALID`가 아닌 `EXPIRED`로 구분하도록, 토큰 기록은 만료 뒤에도 구현 설정 시간만큼 남긴다.
-- 로그인하지 않으면 401, 학생이 아닌 계정(교사)은 403이다. 기숙사 자치위원은 학생이므로 스캔할 수 있다.
+- 로그인하지 않으면 401, 학생 정보가 없는 계정(교사)은 403 `MISSING_STUDENT_INFO`다. 기숙사 자치위원은 학생이므로 스캔할 수 있다.
+- `token`이 비어 있으면 400 `INVALID_REQUEST`다. 형식(43자 base64url)이 다른 토큰은 저장소를 조회하지 않고 `INVALID`로 판정한다.
+- 출석 용도는 요청이 아니라 토큰을 발급한 QR 세션의 용도를 쓴다.
 
 ## 작업 분담
 
@@ -71,13 +75,52 @@
 | 관리자 웹 QR 화면 | 관리자 웹 담당 | `qrUrl`을 QR로 표시, 약 20초마다 heartbeat, 이탈·탭 변경 시 close |
 | 로그인 복귀 | 인증 담당 | 미로그인 학생이 로그인 후 원래 `/qr#t=…`로 돌아오게 콜백 리다이렉트 처리 |
 
+## 출석 테이블 (QR·얼굴·조회 공유)
+
+QR이 출석을 처음 기록하는 기능이라 QR 작업에서 만들었다(서버 `V3__create_attendance.sql`, CheckUp-server#37). 학생·출석 조회와 얼굴 인식도 같은 테이블을 쓴다. 전체 ERD는 프로젝트 마무리 때 팀에서 맞춘다.
+
+| 컬럼 | 타입 | 의미 |
+| --- | --- | --- |
+| `id` | `BIGSERIAL` | PK |
+| `student_id` | `BIGINT NOT NULL` → `student(id)` `ON DELETE CASCADE` | 출석 대상 학생. 학생이 삭제되면 당일 출석도 함께 삭제된다. |
+| `purpose` | `VARCHAR(20) NOT NULL` | `DORMITORY` / `STUDY_ROOM` |
+| `operating_day` | `DATE NOT NULL` | 08:00 KST 기준 운영일(DEC-006) |
+| `attended` | `BOOLEAN NOT NULL` | 현재 상태. 수동 미출석이면 false |
+| `first_verified_at` | `TIMESTAMPTZ` | 최초 유효 인증 시각 |
+| `method` | `VARCHAR(20)` | 최초 유효 인증 방식 `QR` / `FACE` / `MANUAL` |
+| `manual_updated_at` | `TIMESTAMPTZ` | 마지막 수동 수정 시각(DEC-008) |
+
+- `UNIQUE (student_id, purpose, operating_day)`: 학생·용도·운영일당 한 행이다(REQ-ATT-002).
+- `member`가 아닌 `student`를 참조한다. 출석 대상은 학생뿐이다.
+- `idx_attendance_operating_day`: 08:00 정리와 운영일별 조회용 인덱스다.
+- 현재 상태(`attended`)와 최초 인증 시각(`first_verified_at`)을 분리한다(REQ-ATT-006).
+
+저장 규칙:
+
+- 출석은 서버 내부 `AttendanceService.markAttended(studentId, purpose, verifiedAt, method)`로만 기록한다. 이 기능 자체에는 HTTP API가 없고, QR 스캔·얼굴 인식이 인증 성공 뒤 호출한다.
+- 운영일은 호출하는 쪽이 넘기지 않고 `verifiedAt`으로 계산한다.
+- 자동 인증은 `INSERT … ON CONFLICT (student_id, purpose, operating_day)`로 원자적으로 처리한다. Redis만으로 중복을 막지 않는다.
+- `first_verified_at`은 가장 이른 유효 인증 시각만 남긴다.
+
+| 결과 | 조건 | QR 스캔 결과 |
+| --- | --- | --- |
+| `RECORDED` | 새로 출석 처리 | `APPROVED` |
+| `ALREADY_ATTENDED` | 이미 출석 상태 | `DUPLICATE` |
+| `SUPERSEDED_BY_MANUAL` | 수동 미출석(`manual_updated_at`) 이전에 발생해 늦게 도착한 인증 (DEC-008) | `DUPLICATE` |
+| `STALE` | `verifiedAt`의 운영일이 오늘이 아님. 08:00 이전 이벤트 재전송으로 전날 기록을 되살리지 않는다 (REQ-ATT-007) | `EXPIRED` |
+| `FUTURE` | `verifiedAt`이 서버 시각보다 5초 넘게 늦음. 5초 이내면 서버 현재 시각으로 낮춰 기록한다 (REQ-ATT-002 시계 보정) | `INVALID` |
+
+- QR은 서버 현재 시각으로 기록하므로 `STALE`·`FUTURE`·`SUPERSEDED_BY_MANUAL`은 실제로 나오지 않는다. 얼굴 오프라인 동기화 대비다.
+- 08:00 이후 전날 행 정리는 학생·출석 조회 계획(REQ-ATT-007)에서 담당한다.
+- 관리자 수동 출석 저장 API는 아직 없다. 생기면 `manual_updated_at`을 채우고 같은 테이블을 쓴다.
+
 ## 계약 보완
 
 - [x] `uuid`, `exp`에 목적·세션 격리·lease를 연결할 방법을 정한다. `sessionId`·`qrUrl`·`tokenExpiresAt`·`leaseExpiresAt`으로 대체했다.
 - [x] 페이지 이탈 종료, heartbeat, 강제 종료 후 서버 lease 만료 계약을 보완한다. heartbeat·close 경로를 추가했고 lease·heartbeat 간격은 구현에서 설정값으로 정한다.
 - [x] 스캔에서 인증 사용자·세션 상태·purpose·운영일을 재검증한다. 스캔 API 판정 순서로 정했다. 운영일은 토큰 만료가 다음 08:00을 넘지 않는 것으로 보장한다.
 - [ ] 관리자 호실 수동 출석 저장 API 부재를 별도 계약 항목으로 남긴다.
-- [ ] 갱신 실패가 기존 QR의 원래 만료를 연장하지 않게 한다.
+- [x] 갱신 실패가 기존 QR의 원래 만료를 연장하지 않게 한다. 토큰 만료 시각은 발급 때 정하고 바꾸지 않으며, 교체는 새 토큰 발급으로만 한다.
 
 ## 기준·검증
 

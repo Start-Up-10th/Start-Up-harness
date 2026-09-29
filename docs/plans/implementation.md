@@ -21,7 +21,7 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 | 상태 확인 | [health-check.md](health-check.md) | `/api/v1/health` | 김준수 | 미착수 |
 | 학생·출석 | [student-attendance.md](student-attendance.md) | `/api/v1/student`, `/api/v1/attend` | 김준수 | 미착수 |
 | 호실 명단 | [room-roster.md](room-roster.md) | `/api/v1/room/student` | 임서하 | 구현 완료 (`feat/room-roster`; 전체 DataGSM 명단 동기화는 별도) |
-| QR 출석 | [qr-attendance.md](qr-attendance.md) | `/api/v1/qr*` | 김성찬 | 미착수 |
+| QR 출석 | [qr-attendance.md](qr-attendance.md) | `/api/v1/qr*` | 김성찬 | 진행 중: 세션·관리자 API·출석 저장·스캔 API 머지 |
 | 얼굴 인식 | [face-recognition.md](face-recognition.md) | `/api/v1/face/*` | 임서하 | 미착수 |
 | 봉사 관리 | [volunteer-management.md](volunteer-management.md) | `/api/v1/volunteer/*` | 김성찬·강민우 | 미착수 |
 | DataGSM 동기화 | [datagsm-webhook.md](datagsm-webhook.md) | `/api/v1/webhook` | 강민우 | 미착수 |
@@ -107,5 +107,6 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 | 2026-09-28 | 호실 명단 API 구현·검증 | `feat/room-roster`: SESSION 권한 검사·정렬된 DB 명단·`dormitory_room` migration·OpenAPI 구현. Java 25, PostgreSQL 17, Redis 7에서 `./gradlew.bat build` 통과; 하네스 `npm run harness:check` 및 20개 자체 검사 통과. 전체 학생 명단 동기화는 별도 작업 |
 | 2026-09-28 | 호실 API PR CI 통합 오류 수정 | PR #41 병합 결과에서 출석·호실 migration의 `V3` 중복을 재현. 최신 `develop` 반영 후 호실 migration을 `V4`로 옮겨 별도 PostgreSQL 17·Redis 7에서 `./gradlew.bat clean build` 통과(91개 테스트). 기존 로컬 DB 이력은 변경하지 않음 |
 | 2026-09-28 | 호실 API PR 리뷰 반영 | 기능에 추가한 테스트 17개에 한국어 `@DisplayName` 추가, 층 계산 JavaDoc 한국어 작성, PR 제목 컨벤션 적용·담당자 지정. 새 PostgreSQL 17·Redis 7에서 `./gradlew.bat clean build` 통과(91개 테스트, 실패·오류·건너뜀 0개) |
+| 2026-09-29 | 호실 API와 최신 develop 충돌 해결 | QR 스캔 PR #42가 병합된 서버 `develop`(`4b80fe2`)을 반영. 학생 저장소의 회원 ID 조회와 호실 명단 조회를 함께 유지하고, 하네스 `main`(`9604d96`)의 QR·출석 문서를 호실 문서와 통합. 새 PostgreSQL 17·Redis 7에서 `./gradlew.bat clean build` 통과(118개 테스트, 실패·오류·건너뜀 0개) |
 
 호실 명단 Spring API는 구현됐다. 전체 DataGSM 명단 동기화, 웹·AI·배포 기능은 별도 작업이다.

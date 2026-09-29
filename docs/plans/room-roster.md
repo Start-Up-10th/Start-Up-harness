@@ -44,3 +44,5 @@
 - 수정 후 별도 PostgreSQL 17·Redis 7에서 `./gradlew.bat clean build` 통과: 17개 테스트 클래스, 91개 테스트, 실패·오류·건너뜀 0개. 기존 로컬 DB의 migration 이력은 변경하지 않았다.
 - 2026-09-28 PR #41 리뷰 반영: 이번 기능에서 추가한 5개 테스트 클래스의 17개 테스트에 한국어 `@DisplayName`을 추가하고 `Student.getDormitoryFloor()`의 JavaDoc을 한국어로 작성했다. PR 제목을 `[feat] 호실 학생 명단 조회 API`로 맞추고 작성자 `Ims2oha`를 담당자로 지정했다.
 - 리뷰 반영 후 새 PostgreSQL 17·Redis 7 환경에서 `./gradlew.bat clean build`를 실행해 91개 테스트가 통과했다(실패·오류·건너뜀 0개).
+- 2026-09-29 PR #41 머지 충돌 해결: 서버 `develop`의 QR 스캔용 `findByMemberId`와 호실 명단 조회 메서드를 함께 유지했다. 하네스 `main`의 QR·출석 문서도 `docs/room-roster`에 병합해 양쪽 문서를 보존했다.
+- 통합 후 새 PostgreSQL 17·Redis 7에서 `./gradlew.bat clean build` 통과: 20개 클래스, 118개 테스트, 실패·오류·건너뜀 0개. 호실 권한·정렬 조회와 실제 DB·Redis를 사용하는 QR 출석 흐름을 포함한다.
