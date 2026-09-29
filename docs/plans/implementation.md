@@ -21,7 +21,7 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 | 상태 확인 | [health-check.md](health-check.md) | `/api/v1/health` | 김준수 | 미착수 |
 | 학생·출석 | [student-attendance.md](student-attendance.md) | `/api/v1/student`, `/api/v1/attend` | 김준수 | 미착수 |
 | 호실 명단 | [room-roster.md](room-roster.md) | `/api/v1/room/student` | 임서하 | 미착수 |
-| QR 출석 | [qr-attendance.md](qr-attendance.md) | `/api/v1/qr*` | 김성찬 | 진행 중: 세션·관리자 API·출석 저장 머지, 스캔 API 리뷰 |
+| QR 출석 | [qr-attendance.md](qr-attendance.md) | `/api/v1/qr*` | 김성찬 | 서버 구현 완료, 웹 연동 리뷰 중, 실기기 검증 전 |
 | 얼굴 인식 | [face-recognition.md](face-recognition.md) | `/api/v1/face/*` | 임서하 | 미착수 |
 | 봉사 관리 | [volunteer-management.md](volunteer-management.md) | `/api/v1/volunteer/*` | 김성찬·강민우 | 미착수 |
 | DataGSM 동기화 | [datagsm-webhook.md](datagsm-webhook.md) | `/api/v1/webhook` | 강민우 | 미착수 |
@@ -34,7 +34,7 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 - [x] `student.role`·`teacher.department`로 서비스 관리자 권한을 판정하고 최상위 `role`은 계정 역할로만 취급한다.
 - [x] `status → accountStatus`, OAuth callback 검증값 `state → oauthState`를 분리한다.
 - [ ] DB migration, 테스트용 clock, 민감정보 없는 로그·fixture를 준비한다.
-- [ ] 실제 구현 뒤 비어 있지 않은 OpenAPI 계약을 `contracts/`에 생성한다.
+- [ ] 실제 구현 뒤 비어 있지 않은 OpenAPI 계약을 `contracts/`에 생성한다. QR은 [qr.openapi.yaml](../../contracts/qr.openapi.yaml)로 생성했다.
 - [ ] 관리자·본인·본인 호실 권한을 서버에서 검증한다.
 
 ## DataGSM 연동 구현 기준

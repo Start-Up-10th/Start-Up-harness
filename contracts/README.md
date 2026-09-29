@@ -1,7 +1,7 @@
 # 서비스 간 계약
 
 제품 정책은 [명세](../docs/spec/index.md), 기술 경계는 [아키텍처](../docs/architecture.md)를 따른다.
-현재 확정된 공개 API는 DataGSM 사용자가 제공한 엔드포인트뿐이다. 내부 REST 경로와 schema는 아직 없다.
+구현된 내부 REST API의 계약은 이 폴더의 OpenAPI 파일로 둔다. 아직 OpenAPI가 없는 API는 각 계획 문서를 따른다.
 
 백엔드 첫 기능 구현 시 실제 OpenAPI 계약을 이 폴더에 생성하고 웹/AI 담당자와 공유한다.
 빈 OpenAPI 파일로 계약이 완료됐다고 처리하지 않는다.
@@ -11,7 +11,13 @@
 - 로그인 상태는 `SESSION` 쿠키로 전달한다(DEC-016). 웹은 `credentials: 'include'`로 요청한다. `Authorization`·`RefreshToken` 헤더는 쓰지 않는다.
 - `GET /api/v1/auth/login`, `GET /api/v1/auth/callback`, `GET /api/v1/auth/me`, `POST /api/v1/auth/logout`. 세부는 [인증 계획](../docs/plans/auth.md).
 - 상태 코드: 400 = `oauthState` 없음·만료·재사용, 401 = 비로그인, 403 = 권한 없음·비활성 계정, 로그아웃 성공 = 204.
-- 공통 오류 envelope는 아직 없다.
+- 공통 오류 형식: `{ "code": "<ErrorCode>", "message": "<기본 메시지>", "errors": [{ "field", "reason" }] }`. `errors`는 요청 값 검증 실패 때만 있다. 웹은 `code`로 분기한다. 단, Spring Security 필터가 막는 401·403은 본문이 없다.
+
+## QR 출석 (구현됨)
+
+- [qr.openapi.yaml](qr.openapi.yaml): `POST /api/v1/qr`, `POST /api/v1/qr/{sessionId}/heartbeat`, `POST /api/v1/qr/{sessionId}/close`, `POST /api/v1/qr/attendance`
+- 제공자: CheckUp-server. 소비자: 관리자 웹 QR 화면, 학생 웹 `/qr`. 정책은 [QR 계획](../docs/plans/qr-attendance.md), DEC-018.
+- 시각 필드는 ISO-8601 UTC 문자열이다.
 
 계약에 반드시 표현할 내용:
 
