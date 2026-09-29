@@ -137,7 +137,8 @@ QR이 출석을 처음 기록하는 기능이라 QR 작업에서 만들었다(�
 | --- | --- | --- |
 | 2026-09-26~29 | 서버 구현 머지: 운영일 계산(CheckUp-server#21), QR 세션·관리자 API(#24·#31), 출석 테이블·저장(#37), `CustomException` 전환(#40), 스캔 API(#42) | `develop` 머지 |
 | 2026-09-29 | 서버 `./gradlew clean build` (로컬 Postgres·Redis, CI 동일) | 테스트 101개 통과 |
-| 2026-09-29 | 웹 연동: 관리자 QR(CheckUp-Client#65), 시각 파싱·`/api` 프록시·학생 스캔 실제 연결(CheckUp-Client#71) | #71 리뷰 중, CI `lint·typecheck·test·build` 통과 |
+| 2026-09-29 | 웹 연동: 관리자 QR(CheckUp-Client#65), 시각 파싱·`/api` 프록시·학생 스캔 실제 연결(CheckUp-Client#71) | 머지, CI `lint·typecheck·test·build` 통과 |
+| 2026-09-29 | PC 브라우저 실기 확인: 로컬 서버(`develop`)·웹(`develop`, `/api` 프록시), 실제 DataGSM 로그인 | 아래 "실기로 확인한 것" |
 
 서버 테스트로 확인한 것:
 
@@ -148,9 +149,20 @@ QR이 출석을 처음 기록하는 기능이라 QR 작업에서 만들었다(�
 - 출석 저장: 동시 10건 중 1건만 기록, 수동 미출석 전후 인증, 지난 운영일(`STALE`)·미래 시각(`FUTURE`), 학생 삭제 시 연쇄 삭제
 - 실제 Redis·Postgres·Security를 켠 통합 흐름(발급 → 스캔 → 중복, 닫힌 세션 `CLOSED`, `ADMIN_ONLY`, `QR_SESSION_NOT_FOUND`)
 
+실기로 확인한 것 (PC Chrome, 관리자 역할은 로컬 DB에서 테스트 계정 역할을 바꿔 확인):
+
+- 서버 `GET /api/v1/auth/login`을 거친 DataGSM 로그인과 세션 발급
+- 웹 `/api/*` 프록시를 거친 관리자 QR 발급, heartbeat 200 유지, 15분 토큰 자동 교체
+- 관리자 탭 두 개가 각자 독립 세션을 갖고, 한 탭을 닫아도 다른 탭의 QR은 유지됨
+- `qrUrl` 링크로 연 학생 스캔: `승인되었습니다.` 후 메인 이동, 출석 1행(`DORMITORY`, `QR`) 저장
+- 같은 운영일 재스캔 `이미 출석 처리된 QR입니다.`, 관리자 탭을 닫은 QR `지금은 출석 인증을 받고 있지 않습니다.`(출석 추가 없음), 만료 토큰 `만료된 QR입니다.` 후 카메라 재시작
+- 응답 시각(마이크로초 6자리 ISO 문자열)을 Chrome(V8)·Safari(JavaScriptCore) 모두 해석
+
 아직 확인하지 못한 것:
 
-- 실제 브라우저·휴대폰으로 관리자 QR 표시부터 학생 스캔까지의 전체 흐름
+
+- 휴대폰 카메라로 화면의 QR을 실제로 찍는 흐름(휴대폰은 `localhost`에 접속할 수 없고 카메라에 HTTPS가 필요해 배포·HTTPS 환경에서 확인)
+- 실제 기숙사 자치위원·사감 계정의 관리자 권한
 - 휴대폰 일반 카메라로 `/qr#t=`를 연 미로그인 학생의 로그인 후 복귀(로그인 복귀 작업 대기)
 - 서버 재시작 중 열린 QR 화면의 복구(heartbeat 404 → 새 세션)를 실제 화면에서 확인
 - 운영 Redis의 `maxmemory-policy noeviction` 설정(운영 환경 구성 시 확인)
