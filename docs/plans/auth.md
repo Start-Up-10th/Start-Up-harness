@@ -26,14 +26,14 @@
 
 - [ ] 권한 부족 문구가 `이용 권한이 없는 계정입니다.`다. REQ-AUTH-003 문구는 `관리자 권한이 없는 계정입니다.`다.
 - [ ] `/api/v1/auth/me`에 학생 ID·학번·호실·동의/얼굴 등록 상태가 없다.
-- [ ] callback이 JSON을 반환한다. 로그인 후 웹 화면으로 복귀하는 흐름을 정해야 한다. 웹 로그인 화면 구현 때 진행([CheckUp-server#26](https://github.com/Start-Up-10th/CheckUp-server/issues/26))
+- [x] callback이 JSON을 반환했다. 이제 `GET /api/v1/auth/login?redirect=/경로`의 상대 경로를 state와 함께 저장하고, callback이 웹 `{PUBLIC_ORIGIN}{경로}`(기본 `/login/complete`)로 302 이동한다. 실패는 `/login?error=<ErrorCode>`([CheckUp-server#53](https://github.com/Start-Up-10th/CheckUp-server/pull/53))
 
 ## 남은 작업
 
 - [ ] DataGSM 콘솔의 Redirect URI를 `/api/v1/auth/callback`으로 재등록
 - [ ] 역할이 로그인 시점에 세션 authority로 고정된다. 웹훅으로 권한이 바뀌면 해당 회원 세션을 무효화하거나 요청마다 `member.role`을 확인([CheckUp-server#25](https://github.com/Start-Up-10th/CheckUp-server/issues/25))
 - [ ] 공통 오류 envelope와 `requestId`. 현재는 `ResponseStatusException` 기본 응답
-- [ ] QR 로그인 복귀 시 원래 QR의 만료·종료·용도 재검사
+- [x] QR 로그인 복귀 시 원래 QR의 만료·종료·용도 재검사: 웹이 로그인 뒤 같은 토큰을 스캔 API에 다시 제출하고 서버가 그때 판정한다([CheckUp-Client#75](https://github.com/Start-Up-10th/CheckUp-Client/pull/75), [qr-attendance.md](qr-attendance.md))
 - [ ] 로그아웃 시 그 사용자가 운영하던 QR·인식 세션 정리
 - [ ] `DataGsmStudentClient`로 `GET https://openapi.datagsm.kr/v1/students` 조회(`X-API-KEY`, `STUDENT_READ`, 페이지네이션, 호실 필터)
 - [ ] SDK `UserInfo`를 서비스 계층에 직접 넘기지 않도록 내부 모델로 분리
