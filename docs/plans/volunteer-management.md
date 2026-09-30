@@ -2,8 +2,7 @@
 
 ## 담당자·API
 
-- 주 담당자: 김성찬
-- 공동 담당자: 강민우
+- 담당자: 강민우
 - `POST /api/v1/volunteer/{student_id}`
 - `DELETE /api/v1/volunteer/{student_id}`
 - `PATCH /api/v1/volunteer/{student_id}/count/increase`
