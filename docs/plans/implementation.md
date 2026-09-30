@@ -25,6 +25,7 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 | 얼굴 인식 | [face-recognition.md](face-recognition.md) | `/api/v1/face/*` | 임서하 | 미착수 |
 | 봉사 관리 | [volunteer-management.md](volunteer-management.md) | `/api/v1/volunteer/*` | 강민우 | 미착수 |
 | DataGSM 동기화 | [datagsm-webhook.md](datagsm-webhook.md) | `/api/v1/webhook` | 강민우 | 미착수 |
+| 알림 | [notification.md](notification.md) | `/api/v1/notifications*` | 강민우 | 미착수 |
 
 ## 공통 선행 작업
 
@@ -66,7 +67,7 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 3. 얼굴 감지는 `GET` + `File[]` body이며 단일 `student_id`·`success`만 반환해 다수 얼굴·unknown·점수·모델 정보를 표현하지 못한다.
 4. 얼굴 인식 결과의 출석 확정·오프라인 임시 기록 동기화 API가 없다.
 5. 관리자 호실 수동 출석 저장 API가 없다.
-6. 공지 CRUD·내부 알림 API가 없다.
+6. 공지 CRUD API가 없다. 내부 알림 API는 [알림 계획](notification.md)으로 정했다(DEC-019).
 7. 호실 API는 단일 호실 조회만 정의해 관리자 층 전개도 전체 조회를 직접 지원하지 않는다.
 8. webhook의 event 값, 서명 방식, old/new 실제 필드, 재전송 idempotency가 미정이다.
 9. 공통 오류 envelope가 정해지지 않았다. 모든 API는 `/api/v1` prefix를 붙인다. 인증은 세션 쿠키 방식으로 정해져 `RefreshToken` 헤더는 쓰지 않는다(DEC-016).
