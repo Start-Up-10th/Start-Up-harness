@@ -7,8 +7,8 @@ info:
     정책과 판정 규칙은 [QR 계획](../docs/plans/qr-attendance.md)과 DEC-018을 따른다.
 
     - 인증: `SESSION` 쿠키(DEC-016). 웹은 `credentials: "include"`로 호출한다.
-    - 로그인하지 않은 요청은 Spring Security가 본문 없이 401로 막는다.
-    - 그 밖의 오류는 공통 `ErrorResponse`이며 웹은 `code`로 분기한다.
+    - 로그인하지 않은 요청은 Spring Security가 401 `ErrorResponse`(`UNAUTHORIZED`)로 막는다.
+    - 오류는 모두 공통 `ErrorResponse`이며 웹은 `code`로 분기한다.
     - 시각은 모두 ISO-8601 UTC 문자열이다.
     - 출석 용도는 `DORMITORY`(기숙사, 기본) / `STUDY_ROOM`(자습실)이다.
 servers:
@@ -153,8 +153,15 @@ components:
   responses:
     Unauthenticated:
       description: |
-        로그인하지 않았다. Spring Security가 본문 없이 응답한다.
-        관리자 API는 세션은 있지만 회원이 삭제된 경우 `ErrorResponse`(`MEMBER_NOT_FOUND`)와 함께 401을 줄 수 있다.
+        로그인하지 않았다. Spring Security가 `UNAUTHORIZED`로 응답한다.
+        관리자 API는 세션은 있지만 회원이 삭제된 경우 `MEMBER_NOT_FOUND`로 401을 줄 수 있다.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            code: UNAUTHORIZED
+            message: 로그인이 필요합니다.
     InvalidRequest:
       description: 요청 본문을 읽을 수 없거나 필수 값이 없다.
       content:
