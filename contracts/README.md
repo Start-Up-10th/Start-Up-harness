@@ -25,6 +25,11 @@
 - 제공자: CheckUp-server. 소비자: 관리자 웹 QR 화면, 학생 웹 `/qr`. 정책은 [QR 계획](../docs/plans/qr-attendance.md), DEC-018.
 - 시각 필드는 ISO-8601 UTC 문자열이다.
 
+## 알림 (계획)
+
+- `GET /api/v1/notifications`, `GET /api/v1/notifications/unread`, `POST /api/v1/notifications/read`. 요청·응답과 생성 규칙은 [알림 계획](../docs/plans/notification.md), DEC-019.
+- 제공자: CheckUp-server. 소비자: 학생 웹 홈 헤더 벨·사이드바 알림, 알림 목록 화면. 정책은 REQ-COM-005. 구현 후 OpenAPI를 이 폴더에 추가한다.
+
 계약에 반드시 표현할 내용:
 
 - OAuth 세션의 사용자 역할, 동의/등록 완료 상태, 본인 데이터 범위.
