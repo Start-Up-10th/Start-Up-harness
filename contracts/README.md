@@ -13,6 +13,12 @@
 - 상태 코드: 400 = `oauthState` 없음·만료·재사용, 401 = 비로그인, 403 = 권한 없음·비활성 계정, 로그아웃 성공 = 204.
 - 공통 오류 형식: `{ "code": "<ErrorCode>", "message": "<기본 메시지>", "errors": [{ "field", "reason" }] }`. `errors`는 요청 값 검증 실패 때만 있다. 웹은 `code`로 분기한다. Spring Security 필터가 막는 401·403도 같은 형식이다(`UNAUTHORIZED`·`FORBIDDEN`, [CheckUp-server#55](https://github.com/Start-Up-10th/CheckUp-server/pull/55)).
 
+## 동의 (구현됨)
+
+- `POST /api/v1/consent`: 본문 `{ "privacy": boolean, "face": boolean, "noticeAlarm": boolean }`, 성공 204. 필수 두 항목이 true가 아니거나 빠지면 400 `INVALID_REQUEST`, 미로그인 401, 학생이 아닌 계정 403 `MISSING_STUDENT_INFO`.
+- `GET /api/v1/auth/me`의 `consented`: 필수 동의 두 항목 완료 여부. 웹은 이 값으로 로그인 후 동의 화면을 거칠지 정한다.
+- 제공자: CheckUp-server. 소비자: 학생 웹 `/consent`, `/login/complete`. 정책은 REQ-AUTH-004, 세부는 [인증 계획](../docs/plans/auth.md).
+
 ## QR 출석 (구현됨)
 
 - [qr.openapi.yaml](qr.openapi.yaml): `POST /api/v1/qr`, `POST /api/v1/qr/{sessionId}/heartbeat`, `POST /api/v1/qr/{sessionId}/close`, `POST /api/v1/qr/attendance`

@@ -5,8 +5,9 @@
 - 담당자: 강민우
 - `GET /api/v1/auth/login` — DataGSM 인가 URL로 302 이동
 - `GET /api/v1/auth/callback?code=&state=` — state 검증, 토큰 교환, 회원 저장, 세션 발급
-- `GET /api/v1/auth/me` — 세션 사용자 조회. 비로그인은 401
+- `GET /api/v1/auth/me` — 세션 사용자 조회(`name`, `role`, `consented`). 비로그인은 401
 - `POST /api/v1/auth/logout` — 세션 무효화, `SESSION` 쿠키 삭제, 204
+- `POST /api/v1/consent` — 학생 서비스 이용 동의 저장(REQ-AUTH-004), 204. 담당: 김성찬([CheckUp-server#61](https://github.com/Start-Up-10th/CheckUp-server/pull/61))
 
 인증은 서버 세션 방식이다([DEC-016](../decisions.md)). JWT·refresh token·재발급 API는 두지 않는다.
 모든 서버 API는 `/api/v1` prefix를 붙인다.
@@ -20,12 +21,20 @@
 - 역할 판정: 학생 `DORMITORY_MANAGER`(기숙사 자치위원)와 교사 `DORMITORY`는 `ADMIN`, 학생회(`STUDENT_COUNCIL`)를 포함한 그 외 활성 학생은 `STUDENT`
 - 로그인 시 `member`(`datagsm_id`=최상위 `id`, 이름, 역할)와 `student`(`datagsm_student_id`=`student.id`, 학년, 반, 번호, 학번, 호실)를 저장·갱신
 - 로그인 시 기존 세션을 무효화하고 새 세션에 회원 id와 역할을 저장해 세션 고정을 막음
-- `/api/v1/auth/me`는 현재 `name`, `role`만 반환
+- `/api/v1/auth/me`는 `name`, `role`, `consented`(필수 동의 두 항목 완료 여부, 학생이 아니면 false)를 반환
+
+## 동의 (REQ-AUTH-004)
+
+- `student`에 `privacy_agreed_at`, `face_agreed_at`(처음 동의 시각), `notice_alarm_agreed`(기숙사 공지 알림 수신, 기본 false)를 둔다(V7). 동의는 학생당 1건이라 별도 테이블을 두지 않는다.
+- `POST /api/v1/consent` 본문 `{ "privacy": true, "face": true, "noticeAlarm": false }`. 필수 두 항목이 true가 아니거나 항목이 빠지면 400 `INVALID_REQUEST`(`errors`에 항목), 미로그인 401, 학생이 아닌 계정 403 `MISSING_STUDENT_INFO`.
+- 동의할 학생은 로그인 세션으로 정한다. 다시 보내면 처음 동의 시각은 유지하고 공지 알림 수신만 바꾼다.
+- 웹은 로그인 후 `/me`의 `consented`로 동의 화면을 거칠지 정한다. 공지 알림 생성(REQ-COM-004)은 `notice_alarm_agreed`로 대상을 고른다.
+- 서버 테스트: 엔티티·서비스·컨트롤러(필수 항목 누락 400, 학생 아님 403, 요청의 다른 회원 id 무시), `/me`의 `consented`. 웹 동의 화면 연결과 로그인한 상태의 실제 저장은 아직 확인하지 않았다.
 
 ## 명세와 다른 부분
 
 - [ ] 권한 부족 문구가 `이용 권한이 없는 계정입니다.`다. REQ-AUTH-003 문구는 `관리자 권한이 없는 계정입니다.`다.
-- [ ] `/api/v1/auth/me`에 학생 ID·학번·호실·동의/얼굴 등록 상태가 없다.
+- [ ] `/api/v1/auth/me`에 학생 ID·학번·호실·얼굴 등록 상태가 없다. 동의 여부는 `consented`로 추가했다([CheckUp-server#61](https://github.com/Start-Up-10th/CheckUp-server/pull/61)).
 - [x] callback이 JSON을 반환했다. 이제 `GET /api/v1/auth/login?redirect=/경로`의 상대 경로를 state와 함께 저장하고, callback이 웹 `{PUBLIC_ORIGIN}{경로}`(기본 `/login/complete`)로 302 이동한다. 실패는 `/login?error=<ErrorCode>`([CheckUp-server#53](https://github.com/Start-Up-10th/CheckUp-server/pull/53))
 
 ## 남은 작업
