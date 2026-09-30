@@ -11,7 +11,7 @@
 - 로그인 상태는 `SESSION` 쿠키로 전달한다(DEC-016). 웹은 `credentials: 'include'`로 요청한다. `Authorization`·`RefreshToken` 헤더는 쓰지 않는다.
 - `GET /api/v1/auth/login`, `GET /api/v1/auth/callback`, `GET /api/v1/auth/me`, `POST /api/v1/auth/logout`. 세부는 [인증 계획](../docs/plans/auth.md).
 - 상태 코드: 400 = `oauthState` 없음·만료·재사용, 401 = 비로그인, 403 = 권한 없음·비활성 계정, 로그아웃 성공 = 204.
-- 공통 오류 형식: `{ "code": "<ErrorCode>", "message": "<기본 메시지>", "errors": [{ "field", "reason" }] }`. `errors`는 요청 값 검증 실패 때만 있다. 웹은 `code`로 분기한다. 단, Spring Security 필터가 막는 401·403은 본문이 없다.
+- 공통 오류 형식: `{ "code": "<ErrorCode>", "message": "<기본 메시지>", "errors": [{ "field", "reason" }] }`. `errors`는 요청 값 검증 실패 때만 있다. 웹은 `code`로 분기한다. Spring Security 필터가 막는 401·403도 같은 형식이다(`UNAUTHORIZED`·`FORBIDDEN`, [CheckUp-server#55](https://github.com/Start-Up-10th/CheckUp-server/pull/55)).
 
 ## QR 출석 (구현됨)
 
