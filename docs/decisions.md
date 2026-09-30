@@ -24,6 +24,7 @@
 | DEC-016 | 확정 · 백엔드 · 2026-09-27 | 로그인 유지는 JWT가 아닌 Spring Session Redis 서버 세션으로 한다. namespace `checkup:session`, 쿠키 `SESSION`(HttpOnly, SameSite=Lax, Secure는 `SESSION_COOKIE_SECURE`), 무요청 만료 기본 7일(`SESSION_TIMEOUT`). refresh token·재발급 API는 두지 않는다. CSRF 토큰은 끄고 SameSite=Lax를 1차 방어로 쓰므로 운영에서 웹과 API를 same-site로 배치한다. DataGSM 연동은 공식 SDK `com.github.themoment-team:datagsm-oauth-sdk-java:1.6.0`(jitpack)을 쓰고 Spring `oauth2-client`는 쓰지 않는다. DataGSM Redirect URI는 백엔드 `/api/v1/auth/callback`이다. 인증을 포함한 모든 서버 API는 `/api/v1` prefix를 붙인다. |
 | DEC-017 | 확정 · 팀 · 2026-09-27 | DEC-015 중 커밋 메시지 형식을 `type: 설명`(type 소문자)으로 바꾼다. PR 제목은 `[type] 설명`을 유지한다. 이미 push된 커밋은 재작성하지 않는다. [Git·PR 컨벤션](conventions.md)에 반영. |
 | DEC-018 | 확정 · 백엔드/웹 · 2026-09-27 | QR 값은 `https://<웹 주소>/qr#t=<토큰>` URL로 한다. 휴대폰 일반 카메라는 학생 웹 `/qr`을 열어 바로 출석을 제출하고, 웹 내부 카메라는 같은 URL에서 토큰을 꺼낸다(REQ-ATT-005). 서버가 `qrUrl`을 만들어 주고, 스캔 판정은 200 + `result`(`APPROVED`·`DUPLICATE`·`EXPIRED`·`CLOSED`·`INVALID`)로 반환한다. 상세는 [QR 계획](plans/qr-attendance.md). |
+| DEC-019 | 확정 · 백엔드 · 2026-09-30 | 웹 내부 알림(REQ-COM-005) API는 본인 알림 목록 `GET /api/v1/notifications`(최근 50개, 최신순, 페이지 없음), 미확인 여부 `GET /api/v1/notifications/unread`, 전체 읽음 `POST /api/v1/notifications/read`로 한다. 알림 생성 API는 두지 않고 서버가 출석 성공·봉사 `+1`·공지 등록 처리 안에서 만든다. 표시 문구 `message`는 서버가 만든다. 같은 학생·유형·원본의 알림은 DB unique로 하나만 둔다. 상세는 [알림 계획](plans/notification.md). |
 
 ## 하네스 선택
 
