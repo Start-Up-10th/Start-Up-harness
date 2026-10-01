@@ -23,7 +23,7 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 | 호실 명단 | [room-roster.md](room-roster.md) | `/api/v1/room/student` | 임서하 | 미착수 |
 | QR 출석 | [qr-attendance.md](qr-attendance.md) | `/api/v1/qr*` | 김성찬 | 서버·웹 연동 완료, PC 실기 확인(로그인 복귀 포함), 휴대폰 카메라 확인 전 |
 | 얼굴 인식 | [face-recognition.md](face-recognition.md) | `/api/v1/face/*` | 임서하 | 미착수 |
-| 봉사 관리 | [volunteer-management.md](volunteer-management.md) | `/api/v1/volunteer/*` | 강민우 | 미착수 |
+| 봉사 관리 | [volunteer-management.md](volunteer-management.md) | `/api/v1/volunteer/*` | 강민우 | 서버 PR 리뷰 중(CheckUp-server#76), 웹 연결 전 |
 | DataGSM 동기화 | [datagsm-webhook.md](datagsm-webhook.md) | `/api/v1/webhook` | 강민우 | 미착수 |
 | 알림 | [notification.md](notification.md) | `/api/v1/notifications*` | 강민우 | 서버 완료(조회·읽음 API, 출석 완료 알림, 08:00 폐기), 웹 연결 전, 봉사·공지 알림 연결 전 |
 
