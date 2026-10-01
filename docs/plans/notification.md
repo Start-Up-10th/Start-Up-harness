@@ -44,7 +44,7 @@
 
 - [ ] 공지 CRUD API가 없어 `NOTICE` 알림은 공지 등록 구현과 함께 연결한다.
 - [ ] 당일 봉사자 지정·취소 API 구현과 함께 `VOLUNTEER` 알림 생성·삭제를 연결한다.
-- [ ] 구현 후 `contracts/`에 OpenAPI를 추가한다.
+- [x] 구현 후 `contracts/`에 OpenAPI를 추가한다([notification.openapi.yaml](../../contracts/notification.openapi.yaml)).
 - [ ] `VOLUNTEER`·`NOTICE` 알림 보관 기간을 운영 기록으로 확정한다.
 
 ## 기준·검증

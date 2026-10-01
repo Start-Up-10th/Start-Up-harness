@@ -25,7 +25,7 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 | 얼굴 인식 | [face-recognition.md](face-recognition.md) | `/api/v1/face/*` | 임서하 | 미착수 |
 | 봉사 관리 | [volunteer-management.md](volunteer-management.md) | `/api/v1/volunteer/*` | 강민우 | 미착수 |
 | DataGSM 동기화 | [datagsm-webhook.md](datagsm-webhook.md) | `/api/v1/webhook` | 강민우 | 미착수 |
-| 알림 | [notification.md](notification.md) | `/api/v1/notifications*` | 강민우 | 미착수 |
+| 알림 | [notification.md](notification.md) | `/api/v1/notifications*` | 강민우 | 서버 완료(조회·읽음 API, 출석 완료 알림, 08:00 폐기), 웹 연결 전, 봉사·공지 알림 연결 전 |
 
 ## 공통 선행 작업
 
