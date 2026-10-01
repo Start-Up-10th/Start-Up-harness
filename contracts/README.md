@@ -19,6 +19,12 @@
 - `GET /api/v1/auth/me`의 `consented`: 필수 동의 두 항목 완료 여부. 웹은 이 값으로 로그인 후 동의 화면을 거칠지 정한다.
 - 제공자: CheckUp-server. 소비자: 학생 웹 `/consent`, `/login/complete`. 정책은 REQ-AUTH-004, 세부는 [인증 계획](../docs/plans/auth.md).
 
+## 봉사 관리 (구현됨)
+
+- [volunteer.openapi.yaml](volunteer.openapi.yaml): `GET /api/v1/volunteer`, `PATCH /api/v1/volunteer/{studentId}/count/increase|decrease`, `POST|DELETE /api/v1/volunteer/{studentId}/duty`, `POST /api/v1/volunteer/{studentId}/duty/complete`
+- 제공자: CheckUp-server([CheckUp-server#76](https://github.com/Start-Up-10th/CheckUp-server/pull/76)). 소비자: 관리자 웹 봉사 관리 화면. 정책은 REQ-COM-001·002·006, DEC-020·021, 세부는 [봉사 관리 계획](../docs/plans/volunteer-management.md).
+- 경로의 `studentId`는 DataGSM 학생 id다. 조정에는 선택 헤더 `Idempotency-Key`를 쓴다. 학생 본인 남은 횟수는 `GET /api/v1/users/{studentId}/volunteer`다.
+
 ## QR 출석 (구현됨)
 
 - [qr.openapi.yaml](qr.openapi.yaml): `POST /api/v1/qr`, `POST /api/v1/qr/{sessionId}/heartbeat`, `POST /api/v1/qr/{sessionId}/close`, `POST /api/v1/qr/attendance`
