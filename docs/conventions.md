@@ -35,3 +35,32 @@
 - 서비스 레포: 기능 PR은 `develop`으로 보낸다. approve 1개와 CI 통과가 필요하다. `main`은 배포할 때만 `develop`에서 머지한다.
 - 하네스 레포: `main`으로 보낸다.
 - PR 본문은 각 레포의 PR 템플릿을 따른다.
+
+## 서버 테스트 작성
+
+Spring 서버(JUnit 5) 테스트는 아래 형식을 따른다. 결정 근거는 [DEC-022](decisions.md).
+
+```java
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+/**
+ * 운영일이 Asia/Seoul 08:00 경계로 계산되는지 검증한다(DEC-006).
+ */
+class OperatingDayCalculatorTest {
+
+    @Test
+    @DisplayName("오전 8시 직전은 전날 운영일이다")
+    void justBefore8IsPreviousOperatingDay() {
+        // given / when / then
+    }
+}
+```
+
+- 메서드명은 영문 camelCase로 쓰고, 한국어 설명은 `@DisplayName`에 쓴다. 한글 메서드명은 쓰지 않는다.
+- 테스트 클래스 위 Javadoc에 무엇을 검증하는지 한 문장으로 쓴다. 관련 REQ·DEC가 있으면 괄호로 함께 적는다.
+- `@Test`·`@ParameterizedTest` 바로 아래에 `@DisplayName`을 둔다.
+- `static` import는 맨 위에 모으고, 한 줄을 띄운 뒤 나머지 import를 쓴다.
+- 이미 머지된 테스트도 수정할 때 이 형식으로 맞춘다. 다른 PR이 고치고 있는 테스트는 충돌을 피하려고 그 PR이 머지된 뒤에 맞춘다.
