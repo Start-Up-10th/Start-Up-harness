@@ -31,6 +31,15 @@
 - 제공자: CheckUp-server. 소비자: 관리자 웹 QR 화면, 학생 웹 `/qr`. 정책은 [QR 계획](../docs/plans/qr-attendance.md), DEC-018.
 - 시각 필드는 ISO-8601 UTC 문자열이다.
 
+## 얼굴 등록·인식 (Spring 구현됨, 제품 통합 미확인)
+
+- [face.openapi.yaml](face.openapi.yaml): 학생 동의 확인·상태·최초 등록과 관리자 카메라 인식 세션 API.
+- Spring은 로그인 `SESSION` 쿠키와 관리자 권한을 검증하고, AI 서버에는 `FACE_SERVICE_TOKEN`만 전달한다. DataGSM 토큰과 브라우저 쿠키는 AI 요청에 전달하지 않는다.
+- 등록 영상과 인식 프레임은 요청 본문 raw bytes이며, 서버는 처리 후 버퍼를 비운다. 벡터·학생 매핑·출석 권한은 Spring이 관리한다.
+- AI `student_id`는 DataGSM canonical student ID다. Spring은 현재 인식 세션 후보 목록과 학생을 다시 확인한 뒤 CheckUp DB 학생 키로 출석을 기록한다. unknown은 `studentName`, `studentNumber`, `attendance`가 `null`이다.
+- Spring client/service 단위 테스트는 구현 상태를 확인하지만, 배포된 보호 AI 경로와 브라우저→Spring→AI 제품 E2E는 별도 검증 대상이다. 이를 마치기 전 acceptance를 완료 처리하지 않는다.
+- Spring→AI 연결 설정과 보호된 호출 스모크 테스트는 [얼굴 인식 계획](../docs/plans/face-recognition.md)에 기록한다.
+
 ## 알림 (구현됨)
 
 - [notification.openapi.yaml](notification.openapi.yaml): `GET /api/v1/notifications`, `GET /api/v1/notifications/unread`, `POST /api/v1/notifications/read`

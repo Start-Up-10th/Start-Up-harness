@@ -22,7 +22,7 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 | 학생·출석 | [student-attendance.md](student-attendance.md) | `/api/v1/student`, `/api/v1/attend` | 김준수 | 미착수 |
 | 호실 명단 | [room-roster.md](room-roster.md) | `/api/v1/room/student` | 임서하 | 미착수 |
 | QR 출석 | [qr-attendance.md](qr-attendance.md) | `/api/v1/qr*` | 김성찬 | 서버·웹 연동 완료, PC 실기 확인(로그인 복귀 포함), 휴대폰 카메라 확인 전 |
-| 얼굴 인식 | [face-recognition.md](face-recognition.md) | `/api/v1/face/*` | 임서하 | 미착수 |
+| 얼굴 인식 | [face-recognition.md](face-recognition.md) | `/api/v1/face/*` | 임서하 | Spring·AI 코드 구현, 배포 AI protected API·브라우저 제품 E2E 미검증 |
 | 봉사 관리 | [volunteer-management.md](volunteer-management.md) | `/api/v1/volunteer/*` | 강민우 | 서버 PR 리뷰 중(CheckUp-server#76), 웹 연결 전 |
 | DataGSM 동기화 | [datagsm-webhook.md](datagsm-webhook.md) | `/api/v1/webhook` | 강민우 | 미착수 |
 | 알림 | [notification.md](notification.md) | `/api/v1/notifications*` | 강민우 | 서버 완료(조회·읽음 API, 출석 완료 알림, 08:00 폐기), 웹 연결 전, 봉사·공지 알림 연결 전 |
@@ -64,8 +64,8 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 
 1. QR 발급 문서에 `purpose`, 독립 세션 ID, lease/heartbeat, 종료, 15분 갱신이 없다. → [qr-attendance.md](qr-attendance.md) 관리자 API 응답에 반영했다.
 2. QR 출석 문서에 운영일·중복 결과·현재 사용자 범위가 없다. → [qr-attendance.md](qr-attendance.md) 스캔 API에 반영했다.
-3. 얼굴 감지는 `GET` + `File[]` body이며 단일 `student_id`·`success`만 반환해 다수 얼굴·unknown·점수·모델 정보를 표현하지 못한다.
-4. 얼굴 인식 결과의 출석 확정·오프라인 임시 기록 동기화 API가 없다.
+3. Spring 얼굴 API 계약은 [face.openapi.yaml](../../contracts/face.openapi.yaml)에, AI 내부 계약은 AI 저장소 `contracts/ai-face.openapi.yaml`에 기록한다. 실제 제품 흐름 검증은 남아 있다.
+4. 온라인 얼굴 인식 출석은 Spring에서 구현했다. 오프라인 임시 기록과 복구 후 동기화 계약·정책은 아직 확인되지 않았다.
 5. 관리자 호실 수동 출석 저장 API가 없다.
 6. 공지 CRUD API가 없다. 내부 알림 API는 [알림 계획](notification.md)으로 정했다(DEC-019).
 7. 호실 API는 단일 호실 조회만 정의해 관리자 층 전개도 전체 조회를 직접 지원하지 않는다.
@@ -74,6 +74,8 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 10. 봉사 증가·차감 API의 재시도 idempotency와 0회 하한 검증을 구현 계약에 반영한다. UI 노출은 SRC-NOTION-CHECKUPZIP 승인으로 `+ / −` 모두 확정됐다.
 
 없는 경로를 임의로 구현하지 않고, 제공자·소비자·관련 REQ·수용 시나리오를 정한 뒤 `contracts/`에 반영한다.
+
+얼굴 AI 연결의 상세 진척과 미검증 항목은 [얼굴 인식 계획](face-recognition.md)을 따른다. browser→Spring→AI 제품 E2E를 구현 완료로 집계하지 않는다.
 
 ## 웹·운영 통합
 
