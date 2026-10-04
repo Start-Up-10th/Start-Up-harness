@@ -24,6 +24,7 @@
 - 당일 봉사자(`volunteer_duty`, 학생·운영일 unique)는 봉사 1회 이상인 학생만 지정한다. 지정할 때 같은 트랜잭션에서 `VOLUNTEER` 알림(원본 `duty:<운영일>`)을 만들고 취소하면 지운다.
 - 완료는 지정을 완료로 바꾸고 `−1` 기록·차감을 한 트랜잭션에서 한다. 완료한 지정은 취소할 수 없다.
 - 학생 본인 남은 횟수 조회는 `GET /api/v1/users/{studentId}/volunteer`(CheckUp-server#69)이다.
+- 학생 본인 봉사 완료 내역은 `GET /api/v1/users/{studentId}/volunteer/history`(CheckUp-server#120): `{ studentId, history: [{ operatingDay, completedAt }] }`, 완료(`COMPLETED`)만 최신 운영일부터. 권한은 횟수 조회와 같다(본인·관리자, 다른 학생 403, 없는 학생 404). DEC-024.
 
 ## 계약 보완
 
