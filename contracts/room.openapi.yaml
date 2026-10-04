@@ -1,0 +1,125 @@
+openapi: 3.1.0
+info:
+  title: CheckUp 호실 명단 API
+  version: 1.0.0
+  description: |
+    호실 학생 명단과 오늘 출석 여부 조회 API다. 제공자는 CheckUp-server, 소비자는 학생 웹 홈 `내 호실` 카드와 관리자 호실 상세다.
+    정책은 REQ-UI-003, REQ-ATT-001, DEC-023, 세부는 [호실 명단 계획](../docs/plans/room-roster.md)을 따른다.
+
+    - 인증: `SESSION` 쿠키(DEC-016). 웹은 `credentials: "include"`로 호출한다.
+    - 관리자는 모든 호실, 학생은 본인 호실만 조회한다. 학생 본인 호실 번호는 `GET /api/v1/auth/me`의 `student.dormitoryRoom`이다.
+    - 출석 여부는 요청한 용도의 오늘 운영일(08:00 KST 경계, DEC-006) 상태다. 학생 홈은 기숙사 입소(`DORMITORY`)를 쓴다(DEC-023).
+servers:
+  - url: /
+    description: 웹과 같은 출처. 웹은 `/api/*`를 Spring 서버로 프록시한다.
+security:
+  - sessionCookie: []
+tags:
+  - name: 호실
+    description: 호실 학생 명단(REQ-UI-002·003).
+paths:
+  /api/v1/room/student:
+    get:
+      tags: [호실]
+      summary: 호실 학생 명단
+      description: |
+        호실 학생을 이름·학번 순으로 돌려준다. 각 학생의 `attended`는 `purpose` 용도의 오늘 운영일 출석 상태다.
+        출석 행이 없거나 수동으로 미출석 처리된 학생은 false다. 용도가 다르면 출석을 따로 본다(REQ-ATT-001).
+      operationId: getRoomStudents
+      parameters:
+        - name: dormitoryRoom
+          in: query
+          required: true
+          description: 조회할 호실 번호(양수)
+          schema:
+            type: integer
+            minimum: 1
+        - name: purpose
+          in: query
+          required: false
+          description: 출석 여부를 볼 용도. 없으면 `DORMITORY`. 없는 값은 400.
+          schema:
+            type: string
+            enum: [DORMITORY, STUDY_ROOM]
+            default: DORMITORY
+      responses:
+        "200":
+          description: 호실 학생 명단
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoomStudentResponse"
+              example:
+                - student_name: 학생A
+                  student_class: 4
+                  student_number: 2405
+                  attended: true
+                - student_name: 학생B
+                  student_class: 4
+                  student_number: 2412
+                  attended: false
+        "400":
+          description: 호실 번호가 없거나 숫자가 아니거나 0 이하, 또는 없는 용도
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: 로그인하지 않았다(`UNAUTHORIZED`)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: |
+            학생이 다른 호실을 요청했거나 호실이 배정되지 않았다(`FORBIDDEN`).
+            학생 정보가 없는 비관리자이거나 조회한 호실에 학생이 없다(`MISSING_STUDENT_INFO`).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: SESSION
+  schemas:
+    RoomStudentResponse:
+      type: object
+      required: [student_name, student_class, student_number, attended]
+      properties:
+        student_name:
+          type: string
+        student_class:
+          type: integer
+          description: 반
+        student_number:
+          type: integer
+          description: 표시용 학번(예 2405)
+        attended:
+          type: boolean
+          description: 요청한 용도의 오늘 운영일에 지금 출석 상태인지
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          description: 서버 `ErrorCode` 이름
+        message:
+          type: string
+          description: 오류 코드의 기본 메시지. 예외 원문을 담지 않는다.
+        errors:
+          type: array
+          description: 요청 값 검증 실패 때만 있다. 거부된 입력값은 담지 않는다.
+          items:
+            type: object
+            required: [field, reason]
+            properties:
+              field:
+                type: string
+              reason:
+                type: string

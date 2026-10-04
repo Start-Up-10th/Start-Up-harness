@@ -5,7 +5,7 @@
 - 담당자: 강민우
 - `GET /api/v1/auth/login` — DataGSM 인가 URL로 302 이동
 - `GET /api/v1/auth/callback?code=&state=` — state 검증, 토큰 교환, 회원 저장, 세션 발급
-- `GET /api/v1/auth/me` — 세션 사용자 조회(`name`, `role`, `consented`). 비로그인은 401
+- `GET /api/v1/auth/me` — 세션 사용자 조회(`name`, `role`, `consented`, `student`). 비로그인은 401
 - `POST /api/v1/auth/logout` — 세션 무효화, `SESSION` 쿠키 삭제, 204
 - `POST /api/v1/consent` — 학생 서비스 이용 동의 저장(REQ-AUTH-004), 204. 담당: 김성찬([CheckUp-server#61](https://github.com/Start-Up-10th/CheckUp-server/pull/61))
 
@@ -21,7 +21,8 @@
 - 역할 판정: 학생 `DORMITORY_MANAGER`(기숙사 자치위원)와 교사 `DORMITORY`는 `ADMIN`, 학생회(`STUDENT_COUNCIL`)를 포함한 그 외 활성 학생은 `STUDENT`
 - 로그인 시 `member`(`datagsm_id`=최상위 `id`, 이름, 역할)와 `student`(`datagsm_student_id`=`student.id`, 학년, 반, 번호, 학번, 호실)를 저장·갱신
 - 로그인 시 기존 세션을 무효화하고 새 세션에 회원 id와 역할을 저장해 세션 고정을 막음
-- `/api/v1/auth/me`는 `name`, `role`, `consented`(필수 동의 두 항목 완료 여부, 학생이 아니면 false)를 반환
+- `/api/v1/auth/me`는 `name`, `role`, `consented`(필수 동의 두 항목 완료 여부, 학생이 아니면 false), `student`를 반환
+- `student`는 세션 회원의 학생 정보다: `studentId`(DataGSM 학생 id, `/api/v1/users/{studentId}` 경로 값), `grade`, `classNumber`, `number`, `studentNumber`(표시용 학번), `dormitoryRoom`, `dormitoryFloor`(호실/100). 호실 미배정이면 두 값이 null, 학생 정보가 없는 회원(교사)은 `student`가 null, 기숙사 자치위원은 `ADMIN`이면서 `student`가 있다. 학생은 세션 회원 id로만 찾는다(`CurrentMemberService`, [CheckUp-server#90](https://github.com/Start-Up-10th/CheckUp-server/pull/90)). 학생 웹은 이 값으로 사이드바·홈·마이페이지 프로필과 본인 호실 조회를 한다([CheckUp-Client#114](https://github.com/Start-Up-10th/CheckUp-Client/pull/114))
 
 ## 동의 (REQ-AUTH-004)
 
@@ -34,7 +35,8 @@
 ## 명세와 다른 부분
 
 - [ ] 권한 부족 문구가 `이용 권한이 없는 계정입니다.`다. REQ-AUTH-003 문구는 `관리자 권한이 없는 계정입니다.`다.
-- [ ] `/api/v1/auth/me`에 학생 ID·학번·호실·얼굴 등록 상태가 없다. 동의 여부는 `consented`로 추가했다([CheckUp-server#61](https://github.com/Start-Up-10th/CheckUp-server/pull/61)).
+- [x] `/api/v1/auth/me`에 학생 ID·학번·호실이 없었다. `student`로 추가했다([CheckUp-server#90](https://github.com/Start-Up-10th/CheckUp-server/pull/90)). 동의 여부는 `consented`([CheckUp-server#61](https://github.com/Start-Up-10th/CheckUp-server/pull/61)).
+- [ ] `/api/v1/auth/me`에 얼굴 등록 상태가 없다. 얼굴 등록 여부는 `GET /api/v1/face/me`로 따로 조회한다.
 - [x] callback이 JSON을 반환했다. 이제 `GET /api/v1/auth/login?redirect=/경로`의 상대 경로를 state와 함께 저장하고, callback이 웹 `{PUBLIC_ORIGIN}{경로}`(기본 `/login/complete`)로 302 이동한다. 실패는 `/login?error=<ErrorCode>`([CheckUp-server#53](https://github.com/Start-Up-10th/CheckUp-server/pull/53))
 
 ## 남은 작업
