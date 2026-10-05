@@ -103,6 +103,7 @@
         "STUDENT의 student.role=DORMITORY_MANAGER는 관리자이고 STUDENT_COUNCIL과 GENERAL_STUDENT는 일반 학생이다",
         "TEACHER의 teacher.department=DORMITORY는 관리자이고 GRADE는 일반 교직원이다",
         "최상위 role=USER인 학생 사감은 정상 관리자이며 최상위 role=DORMITORY_MANAGER만 있는 잘못된 구조는 관리자 판정을 받지 않는다",
+        "관리자 허용 목록의 DataGSM 계정 id는 일반 학생이어도 관리자이고, 비활성·지원하지 않는 계정이면 목록에 있어도 거부하며, 학생 동기화 뒤에도 관리자를 유지한다",
         "학생과 비로그인은 관리자 변경·벡터 조회를 거부당한다",
         "학생은 허용된 본인/본인 호실 범위만 조회한다"
       ],
