@@ -105,6 +105,7 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 | 2026-09-26 | `npm run harness:check` | 하네스 문서 검사 및 테스트 통과, 제품 서비스는 미구현 |
 | 2026-09-27 | DataGSM 인증 구현 내용 반영 | 서버 세션 방식 DEC-016, 인증 경로·계약·환경변수·도메인 모델 갱신. 명세와 다른 코드 부분은 auth.md에 기록. 서버 인증 자동 테스트는 없음 |
 | 2026-09-27 | 서버 인증 테스트·CI 수정 | 서버 `AuthServiceTest` 역할 판정 11개 통과, Server CI에 테스트용 DataGSM 환경변수 추가 후 통과. 웹훅 권한 반영(#25)과 로그인 후 복귀(#26)는 서버 이슈로 분리 |
+| 2026-10-04 | 전교생 미리 저장 결정 반영 | 로그인 전 재학생을 계정 없이 저장하고 로그인 때 연결하는 결정과 동의 범위(얼굴 정보)를 REQ-AUTH-002·004, ACC-AUTH-002, DEC-026, SRC-PRESTORE-STUDENTS, room-roster 계획에 반영. 서버 구현은 CheckUp-server#119에서 테스트, 실제 DataGSM 동기화 확인은 없음 |
 | 2026-10-04 | 학생 화면 서버 연동 내용 반영 | `/api/v1/auth/me`의 `student`(CheckUp-server#90)를 auth 계획·계약에, 호실 명단 `attended`·`purpose`(CheckUp-server#101)를 room-roster 계획·`contracts/room.openapi.yaml`에 기록. 학생 홈 출석 용도를 기숙사 입소로 정한 사용자 결정을 REQ-UI-003·ACC-UI-003·DEC-023·SRC-STUDENT-HOME-PURPOSE에 반영. 웹 레포에만 있던 2026-09-25 결정(학생 홈 호실은 목록 대신 Figma 배치 그림, SRC-FIGMA-USER)도 REQ-UI-003·ACC-UI-003·SRC-CORRECTIONS에 맞춤. 서버 테스트는 각 PR에서 실행, 실서버 확인은 없음 |
 | 2026-10-04 | 학생 봉사 활동 결정 반영 | 사용자 결정(남은 횟수 + 완료 내역)을 REQ-COM-003·ACC-COM-003·DEC-024·SRC-VOLUNTEER-REMAINING에, 완료 내역 API(CheckUp-server#120)를 봉사 계획·계약에 기록. 이전 "남은 횟수만, 활동 목록 없음"을 대체 |
 

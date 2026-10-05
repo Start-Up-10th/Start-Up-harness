@@ -8,7 +8,8 @@
 ## 구현
 
 - 관리자는 모든 호실, 학생은 본인 호실만 조회한다. 다른 호실·호실 미배정 학생은 403 `FORBIDDEN`, 학생 정보 없음·빈 호실은 403 `MISSING_STUDENT_INFO`.
-- 응답은 이름·학번 순 배열이고 항목은 `student_name`, `student_class`, `student_number`(표시용 학번), `attended`다.
+- 명단에는 학생 동기화로 미리 저장한, 아직 로그인하지 않은 학생도 포함한다(DEC-026, [CheckUp-server#119](https://github.com/Start-Up-10th/CheckUp-server/pull/119)).
+- 응답은 학생 이름·학번 순 배열이고 항목은 `student_name`, `student_class`, `student_number`(표시용 학번), `attended`다.
 - `attended`는 `purpose`(기본 `DORMITORY`)의 오늘 운영일(08:00 KST 경계) 출석 상태다. 행이 없거나 수동 미출석이면 false. 호실 학생 id 목록으로 한 번에 읽는다(`AttendanceRepository.findAttendedStudentIds`, [CheckUp-server#101](https://github.com/Start-Up-10th/CheckUp-server/pull/101)).
 - 학생 홈은 본인 호실 번호(`/api/v1/auth/me`의 `student.dormitoryRoom`)로 `purpose=DORMITORY`를 조회해 명단·출석 인원을 보인다(DEC-023, [CheckUp-Client#118](https://github.com/Start-Up-10th/CheckUp-Client/pull/118)).
 - 인증된 학생의 본인 호실 범위와 관리자 화면의 호실 학생 정보를 조회한다.

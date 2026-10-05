@@ -30,6 +30,7 @@
 | DEC-022 | 확정 · 팀 · 2026-10-03 | 서버 테스트는 영문 camelCase 메서드명 + 한국어 `@DisplayName`, 클래스 Javadoc에 검증 대상(관련 REQ·DEC), `static` import를 맨 위에 둔다. 기존 테스트도 이 형식으로 맞춘다(CheckUp-server#33). [Git·PR 컨벤션](conventions.md)에 반영. |
 | DEC-023 | 확정 · 제품 · 2026-10-04 | 학생 홈 `내 호실` 카드의 출석/미출석은 기숙사 입소(`DORMITORY`) 용도의 오늘 운영일 상태다(SRC-STUDENT-HOME-PURPOSE). 호실 명단 API `GET /api/v1/room/student`는 학생별 `attended`를 주고, 용도는 `purpose` 파라미터(기본 `DORMITORY`)로 고른다. 관리자 호실 상세는 용도 탭에 맞춰 `purpose`를 넘긴다. REQ-UI-003, REQ-ATT-001. |
 | DEC-024 | 확정 · 제품 · 2026-10-04 | 학생 봉사 활동(REQ-COM-003) 카드는 `volunteerCount`를 `남은 봉사 횟수`로 보이고, 활동 내역은 자치위원이 완료를 확인한 당일 봉사(`volunteer_duty.status = COMPLETED`)를 최신 운영일부터 한 건 1회로 보인다(SRC-VOLUNTEER-REMAINING). 서버 `GET /api/v1/users/{studentId}/volunteer/history`(CheckUp-server#120). 사감 `−` 감면은 내역에 넣지 않는다. |
+| DEC-026 | 확정 · 제품 · 2026-10-04 | 학생 동기화는 로그인하지 않은 재학생도 로그인 계정 없이 미리 저장해 명단에 넣는다(SRC-PRESTORE-STUDENTS). 동의서의 대상은 얼굴 정보이며, DataGSM 기본 정보(이름·학번·호실)는 동의 전에도 관리 명단용으로 저장한다. 학생 이름은 학생에 두고, 처음 로그인할 때 DataGSM 학생 id로 계정을 연결한다. REQ-AUTH-002·004, CheckUp-server#105. |
 
 ## 하네스 선택
 
