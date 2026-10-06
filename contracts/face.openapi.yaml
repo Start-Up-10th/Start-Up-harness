@@ -1,0 +1,431 @@
+openapi: 3.0.3
+info:
+  title: CheckUp Face API
+  version: 1.0.0
+  description: Spring-owned face consent, enrollment, and administrator recognition endpoints.
+servers:
+  - url: /
+security:
+  - springSession: []
+paths:
+  /api/v1/face/me:
+    get:
+      operationId: getMyFaceStatus
+      summary: Read the current student's face enrollment status
+      tags: [Face enrollment]
+      responses:
+        '200':
+          description: Current consent, eligibility, and registration status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FaceStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v1/face/consent:
+    post:
+      operationId: confirmFaceConsent
+      summary: Confirm the face consent already saved by the required-consent flow
+      tags: [Face enrollment]
+      responses:
+        '201':
+          description: Face consent confirmation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FaceConsent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/v1/face/enrollments:
+    post:
+      operationId: enrollFace
+      summary: Register the authenticated student's face for the first time
+      description: >-
+        Sends the raw MediaRecorder video body. Spring verifies consent, eligibility,
+        and duplicate enrollment before calling the private AI API. Video bytes are
+        cleared from the request buffer after processing.
+      tags: [Face enrollment]
+      requestBody:
+        required: true
+        content:
+          video/webm:
+            schema:
+              type: string
+              format: binary
+          video/mp4:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '201':
+          description: Face template registered.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentResult'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Consent is missing or the authenticated account is not eligible.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: A face template is already registered.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: Upload exceeds the configured limit.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Video quality or identity checks rejected the enrollment.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          $ref: '#/components/responses/AiFailure'
+        '503':
+          $ref: '#/components/responses/AiUnavailable'
+        '504':
+          $ref: '#/components/responses/AiTimeout'
+  /api/v1/face/sessions:
+    post:
+      operationId: createFaceRecognitionSession
+      summary: Create an administrator camera recognition session
+      description: >-
+        Creates a separate session for one camera page and attendance purpose.
+        Spring chooses the eligible, consented candidate list and owns attendance
+        authorization. Browser cookies are never forwarded to the AI service.
+      tags: [Face recognition]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSessionRequest'
+      responses:
+        '201':
+          description: Active recognition session.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FaceSession'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: No eligible registered candidates are available.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Candidate count exceeds the configured maximum.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          $ref: '#/components/responses/AiFailure'
+        '503':
+          $ref: '#/components/responses/AiUnavailable'
+        '504':
+          $ref: '#/components/responses/AiTimeout'
+  /api/v1/face/sessions/{sessionId}/frames:
+    post:
+      operationId: recognizeFaceFrame
+      summary: Recognize faces in one frame and record authorized attendance
+      description: >-
+        Only matches in this Spring-owned session's candidate list can be associated
+        with a student or recorded for attendance. Unknown and not-attempted results
+        have null student display and attendance fields. Image bytes are cleared after
+        processing. X-Frame-Id is optional; Spring generates one if omitted.
+      tags: [Face recognition]
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Frame-Id
+          in: header
+          required: false
+          schema:
+            type: string
+            maxLength: 128
+      requestBody:
+        required: true
+        content:
+          image/jpeg:
+            schema:
+              type: string
+              format: binary
+          image/webp:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: Face tracks and Spring-authorized attendance outcomes.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FrameResult'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Session is missing, expired, closed, or not owned by this administrator.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          description: Frame exceeds the configured limit.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Frame could not be processed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Frame rate or service concurrency limit was reached.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          $ref: '#/components/responses/AiFailure'
+        '503':
+          $ref: '#/components/responses/AiUnavailable'
+        '504':
+          $ref: '#/components/responses/AiTimeout'
+  /api/v1/face/sessions/{sessionId}:
+    delete:
+      operationId: closeFaceRecognitionSession
+      summary: Close this administrator camera's session
+      tags: [Face recognition]
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Session closed, or already absent.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+components:
+  securitySchemes:
+    springSession:
+      type: apiKey
+      in: cookie
+      name: SESSION
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              reason:
+                type: string
+    FaceStatus:
+      type: object
+      required: [status, consented, eligible, enrolled]
+      properties:
+        status:
+          type: string
+          enum: [REGISTERED, NOT_REGISTERED]
+        consented:
+          type: boolean
+        eligible:
+          type: boolean
+        enrolled:
+          type: boolean
+    FaceConsent:
+      type: object
+      required: [consented, version, consentedAt]
+      properties:
+        consented:
+          type: boolean
+          enum: [true]
+        version:
+          type: string
+        consentedAt:
+          type: string
+          format: date-time
+    EnrollmentResult:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [REGISTERED]
+    CreateSessionRequest:
+      type: object
+      required: [purpose]
+      properties:
+        purpose:
+          type: string
+          enum: [DORMITORY, STUDY_ROOM]
+    FaceSession:
+      type: object
+      required: [sessionId, purpose, status]
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+        purpose:
+          type: string
+          enum: [DORMITORY, STUDY_ROOM]
+        status:
+          type: string
+          enum: [ACTIVE]
+    FrameResult:
+      type: object
+      required: [frameId, faces]
+      properties:
+        frameId:
+          type: string
+        faces:
+          type: array
+          items:
+            $ref: '#/components/schemas/Face'
+    Face:
+      type: object
+      required: [trackId, bbox, landmarks, quality, recognition, attempts, qrRecommended]
+      properties:
+        trackId:
+          type: string
+        bbox:
+          type: array
+          description: Normalized [x, y, width, height] values in the 0..1 range.
+          minItems: 4
+          maxItems: 4
+          items:
+            type: number
+            minimum: 0
+            maximum: 1
+        landmarks:
+          type: array
+          description: Landmark [x, y] points in source-frame pixel coordinates.
+          items:
+            type: array
+            minItems: 2
+            maxItems: 2
+            items:
+              type: number
+              minimum: 0
+        quality:
+          $ref: '#/components/schemas/Quality'
+        recognition:
+          $ref: '#/components/schemas/Recognition'
+        attempts:
+          type: integer
+          minimum: 0
+        qrRecommended:
+          type: boolean
+    Quality:
+      type: object
+      required: [brightness, sharpness, issues]
+      properties:
+        brightness:
+          type: number
+        sharpness:
+          type: number
+        issues:
+          type: array
+          items:
+            type: string
+    Recognition:
+      type: object
+      required: [status, studentName, studentNumber, attendance]
+      properties:
+        status:
+          type: string
+          enum: [KNOWN, UNKNOWN, NOT_ATTEMPTED]
+        studentName:
+          type: string
+          nullable: true
+        studentNumber:
+          type: integer
+          nullable: true
+        attendance:
+          type: string
+          nullable: true
+          enum: [RECORDED, DUPLICATE, STALE, REJECTED]
+  responses:
+    InvalidRequest:
+      description: Request value or media type is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Login session is absent or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: The account lacks the required student or administrator permission.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    AiFailure:
+      description: AI service returned an invalid or rejected response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    AiUnavailable:
+      description: AI service is unavailable.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    AiTimeout:
+      description: AI service timed out.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
