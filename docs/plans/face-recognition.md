@@ -5,6 +5,7 @@
 - 담당자: 임서하
 - `POST /api/v1/face/registration`
 - `GET /api/v1/face/detect`
+- `GET /api/v1/face/recognitions?purpose=&limit=` — 최근 인식 목록(관리자 본인 세션, 오늘, 최신순, limit 1~100·기본 50). 응답 `[{ recognizedAt, result(SUCCESS/FAILED), studentName, studentNumber }]`, 못 알아본 얼굴은 이름·학번 null(DEC-029)
 
 ## 구현
 
