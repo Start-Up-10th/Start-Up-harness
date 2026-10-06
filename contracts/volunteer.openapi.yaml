@@ -374,7 +374,7 @@ components:
   schemas:
     VolunteerAdjustmentResponse:
       type: object
-      required: [createdAt, delta, requestedDelta]
+      required: [createdAt, delta, requestedDelta, kind]
       properties:
         createdAt:
           type: string
@@ -390,7 +390,12 @@ components:
           example: -5
         reason:
           type: [string, "null"]
-          description: 사유. 남기지 않았으면 null
+          description: 사유. 남기지 않았으면 null. 당일 봉사 완료(DUTY_COMPLETION)는 항상 null
+        kind:
+          type: string
+          enum: [ADMIN, DUTY_COMPLETION]
+          description: 조정 종류. ADMIN은 관리자 +/−·여러 회 조정, DUTY_COMPLETION은 당일 봉사 완료로 생긴 -1. 사유가 없으면 웹은 종류별 기본 문구를 활동명으로 보인다(DEC-030)
+          example: ADMIN
     VolunteerAdjustRequest:
       type: object
       required: [delta]
