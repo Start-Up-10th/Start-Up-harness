@@ -127,6 +127,41 @@ paths:
               example:
                 code: VOLUNTEER_COUNT_ZERO
                 message: 봉사 횟수가 0이라 차감할 수 없습니다.
+  /api/v1/volunteer/{studentId}/adjustments:
+    get:
+      tags: [봉사 횟수 조정]
+      summary: 봉사 횟수 조정 이력
+      description: |
+        관리자 전용. 학생 한 명의 조정 이력을 최신순으로 돌려준다(DEC-028). 같은 시각이면 나중에 저장한 기록이 앞이다.
+        당일 봉사 완료의 차감(-1)도 포함한다. `limit`은 1~100(기본 50)이고 벗어나면 400 `INVALID_REQUEST`다.
+      operationId: getVolunteerAdjustments
+      parameters:
+        - $ref: "#/components/parameters/StudentId"
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: 조정 이력. 없으면 빈 배열
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VolunteerAdjustmentResponse"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/AdminOnly"
+        "404":
+          $ref: "#/components/responses/StudentNotFound"
   /api/v1/volunteer/{studentId}/count:
     patch:
       tags: [봉사 횟수 조정]
@@ -337,6 +372,25 @@ components:
             code: DUTY_ALREADY_COMPLETED
             message: 이미 봉사를 완료했습니다.
   schemas:
+    VolunteerAdjustmentResponse:
+      type: object
+      required: [createdAt, delta, requestedDelta]
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+          description: 조정한 시각
+        delta:
+          type: integer
+          description: 실제로 바뀐 횟수. 양수는 추가, 음수는 차감(당일 봉사 완료 포함)
+          example: -2
+        requestedDelta:
+          type: integer
+          description: 관리자가 요청한 횟수. 차감은 남은 횟수까지만 하므로 delta와 다를 수 있다
+          example: -5
+        reason:
+          type: [string, "null"]
+          description: 사유. 남기지 않았으면 null
     VolunteerAdjustRequest:
       type: object
       required: [delta]
