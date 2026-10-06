@@ -32,6 +32,7 @@
 | DEC-024 | 확정 · 제품 · 2026-10-04 | 학생 봉사 활동(REQ-COM-003) 카드는 `volunteerCount`를 `남은 봉사 횟수`로 보이고, 활동 내역은 자치위원이 완료를 확인한 당일 봉사(`volunteer_duty.status = COMPLETED`)를 최신 운영일부터 한 건 1회로 보인다(SRC-VOLUNTEER-REMAINING). 서버 `GET /api/v1/users/{studentId}/volunteer/history`(CheckUp-server#120). 사감 `−` 감면은 내역에 넣지 않는다. |
 | DEC-025 | 확정 · 제품 · 2026-10-05 | 기자위·사감 테스트 계정이 없어 관리자 기능을 확인할 수 없으므로, 서버 설정 `CHECKUP_ADMIN_DATAGSM_IDS`의 DataGSM 계정 id(`member.datagsm_id`)를 관리자로 허용한다(SRC-ADMIN-ALLOWLIST). 비활성·지원하지 않는 계정 거부를 먼저 적용하고, 학생 동기화는 이 계정을 STUDENT로 내리지 않는다. 운영 전 비우거나 최소 인원만 둔다. REQ-AUTH-003, CheckUp-server#121. |
 | DEC-026 | 확정 · 제품 · 2026-10-04 | 학생 동기화는 로그인하지 않은 재학생도 로그인 계정 없이 미리 저장해 명단에 넣는다(SRC-PRESTORE-STUDENTS). 동의서의 대상은 얼굴 정보이며, DataGSM 기본 정보(이름·학번·호실)는 동의 전에도 관리 명단용으로 저장한다. 학생 이름은 학생에 두고, 처음 로그인할 때 DataGSM 학생 id로 계정을 연결한다. REQ-AUTH-002·004, CheckUp-server#105. |
+| DEC-027 | 확정 · 제품 · 2026-10-06 | 관리자는 봉사 횟수를 한 번에 1~99회 늘리거나 줄이고 사유(선택, 100자 이하)를 남길 수 있다. 남은 횟수보다 많이 빼면 남은 횟수까지만 빼고, 남은 횟수가 0이면 거부한다. 기록에는 실제 바뀐 횟수와 요청 횟수를 함께 남겨 재시도 키 확인에 쓴다. 기존 `+`/`−` 1회 버튼과 API는 유지한다. 사유는 로그에 남기지 않는다. REQ-COM-002(#139). |
 
 ## 하네스 선택
 
