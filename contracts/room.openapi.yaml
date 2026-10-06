@@ -44,7 +44,7 @@ paths:
             default: DORMITORY
       responses:
         "200":
-          description: 호실 학생 명단
+          description: 호실 학생 명단. 관리자가 학생이 없는 호실을 조회하면 빈 배열이다.
           content:
             application/json:
               schema:
@@ -75,7 +75,7 @@ paths:
         "403":
           description: |
             학생이 다른 호실을 요청했거나 호실이 배정되지 않았다(`FORBIDDEN`).
-            학생 정보가 없는 비관리자이거나 조회한 호실에 학생이 없다(`MISSING_STUDENT_INFO`).
+            학생 정보가 없는 비관리자다(`MISSING_STUDENT_INFO`).
           content:
             application/json:
               schema:

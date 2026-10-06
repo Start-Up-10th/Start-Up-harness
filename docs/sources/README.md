@@ -37,6 +37,9 @@
 | SRC-VOLUNTEER-REMAINING | 사용자 2026-10-04: 학생 봉사 카드가 `누적 봉사 횟수`인데 서버 값은 앞으로 해야 할 횟수라 어떻게 맞출지 묻는 질문(남은 횟수 + 완료 내역 / 남은 횟수만 / 누적 유지)에 `남은 횟수 + 완료 내역` 선택 | community 명세 REQ-COM-003, DEC-024 |
 | SRC-PRESTORE-STUDENTS | 사용자 2026-10-01 `명단에 전교생 다 들어가게`, 2026-10-04 동의 범위 질문에 `그 정보 동의서가 그거야 얼굴 사진을 말하는거야` | identity 명세 REQ-AUTH-002·004, DEC-026 |
 | SRC-ADMIN-ALLOWLIST | 사용자 2026-10-04 `없는데 둘다 그리고 개발자 계정들도 넣어야하는데 관리자로 어떻게 하지?`(기자위·사감 계정 없음), 환경변수 허용 목록 방식 선택(`A로 이슈 파줘`) | identity 명세 REQ-AUTH-003, DEC-025 |
+| SRC-VOLUNTEER-KIND | 사용자 2026-10-06: #176(프론트 요청, 봉사 이력 활동명) 방식 질문에 `B안`(조정 종류를 응답에 넣고 프론트가 종류별 기본 문구) 선택 | community 명세 REQ-COM-002, DEC-030 |
+| SRC-FACE-RECENT | 사용자 2026-10-06: #143 최근 인식 기록의 조회 범위와 실패 기록 시점을 추천안대로(`#143 추천대로`) 결정 — 그 관리자가 연 세션 기록만, 못 알아본 얼굴은 AI의 QR 안내 때만 한 줄 | face 명세 REQ-FACE-007, DEC-029 |
+| SRC-VOLUNTEER-ADJUST | 사용자 2026-10-06: #139(프론트 요청) 정책 질문에 사유 `선택`, 한 번에 조정 `1~99회`, 남은 횟수보다 많이 빼면 `0까지만`, 기존 increase·decrease API `유지` 선택 | community 명세 REQ-COM-002, DEC-027 |
 | SRC-HANDOFF | 이 작업 직전 assistant의 16개 절 전체 명세 + AGENTS 제안 | 통합 기준으로 유지하되 assistant 추론은 직접 사용자 결정과 구분 |
 | SRC-CORRECTIONS | 아래 정정 목록 | 구안 복구 방지 |
 

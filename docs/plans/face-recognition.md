@@ -12,6 +12,7 @@
 
 - 담당자: 임서하
 - Spring 공개 API: `GET /api/v1/face/me`, `POST /api/v1/face/consent`, `POST /api/v1/face/enrollments`, `POST /api/v1/face/sessions`, `POST /api/v1/face/sessions/{sessionId}/frames`, `DELETE /api/v1/face/sessions/{sessionId}`
+- `GET /api/v1/face/recognitions?purpose=&limit=` — 최근 인식 목록(관리자 본인 세션, 오늘, 최신순, limit 1~100·기본 50). 응답 `[{ recognizedAt, result(SUCCESS/FAILED), studentName, studentNumber }]`, 못 알아본 얼굴은 이름·학번 null(DEC-029)
 - AI 내부 API: `POST /internal/v1/face/enrollments/extract`, `PUT /internal/v1/face/sessions/{session_id}`, `POST /internal/v1/face/sessions/{session_id}/frames`, `DELETE /internal/v1/face/sessions/{session_id}`
 - 브라우저는 Spring `SESSION` 쿠키로 인증하며 AI endpoint나 `FACE_SERVICE_TOKEN`을 직접 사용하지 않는다.
 
