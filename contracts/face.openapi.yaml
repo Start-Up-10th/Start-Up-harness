@@ -45,8 +45,10 @@ paths:
       operationId: enrollFace
       summary: Register the authenticated student's face for the first time
       description: >-
-        Sends the raw MediaRecorder video body. Spring verifies consent, eligibility,
-        and duplicate enrollment before calling the private AI API. Video bytes are
+        Sends the raw MediaRecorder video body (default limit 20 MB). Spring verifies
+        consent, eligibility, and duplicate enrollment before reading the body, so those
+        rejections do not wait for the upload. A configured number of enrollments run at
+        once; others wait briefly and then get 429 with Retry-After. Video bytes are
         cleared from the request buffer after processing.
       tags: [Face enrollment]
       requestBody:
@@ -91,6 +93,17 @@ paths:
                 $ref: '#/components/schemas/Error'
         '422':
           description: Video quality or identity checks rejected the enrollment.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Too many enrollments are running. Retry after the Retry-After seconds.
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying.
+              schema:
+                type: integer
           content:
             application/json:
               schema:
