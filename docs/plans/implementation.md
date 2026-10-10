@@ -111,5 +111,6 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 | 2026-10-04 | 학생 화면 서버 연동 내용 반영 | `/api/v1/auth/me`의 `student`(CheckUp-server#90)를 auth 계획·계약에, 호실 명단 `attended`·`purpose`(CheckUp-server#101)를 room-roster 계획·`contracts/room.openapi.yaml`에 기록. 학생 홈 출석 용도를 기숙사 입소로 정한 사용자 결정을 REQ-UI-003·ACC-UI-003·DEC-023·SRC-STUDENT-HOME-PURPOSE에 반영. 웹 레포에만 있던 2026-09-25 결정(학생 홈 호실은 목록 대신 Figma 배치 그림, SRC-FIGMA-USER)도 REQ-UI-003·ACC-UI-003·SRC-CORRECTIONS에 맞춤. 서버 테스트는 각 PR에서 실행, 실서버 확인은 없음 |
 | 2026-10-04 | 학생 봉사 활동 결정 반영 | 사용자 결정(남은 횟수 + 완료 내역)을 REQ-COM-003·ACC-COM-003·DEC-024·SRC-VOLUNTEER-REMAINING에, 완료 내역 API(CheckUp-server#120)를 봉사 계획·계약에 기록. 이전 "남은 횟수만, 활동 목록 없음"을 대체 |
 | 2026-10-05 | 관리자 허용 목록 결정 반영 | 개발·테스트용 관리자 허용 목록(`CHECKUP_ADMIN_DATAGSM_IDS`)을 REQ-AUTH-003, ACC-AUTH-003, DEC-025, SRC-ADMIN-ALLOWLIST에 반영. 서버 구현은 CheckUp-server#133 테스트로 확인, 배포 설정은 #134, 실서버 확인은 없음 |
+| 2026-10-10 | 학생 제외 목록 결정 반영 | DataGSM 학생 중 실제 학생이 아닌 데이터를 빼는 제외 목록(`CHECKUP_EXCLUDED_DATAGSM_STUDENT_IDS`)을 REQ-AUTH-002, ACC-AUTH-002, DEC-034, SRC-STUDENT-EXCLUSION에 반영. 서버 구현은 CheckUp-server#242, 실서버 확인은 없음 |
 
 현재 변경은 명세·계획 문서뿐이며 제품 API·웹·AI·배포 구현은 수행하지 않았다.
