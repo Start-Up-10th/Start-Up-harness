@@ -62,8 +62,11 @@ DataGSM 원본 DTO의 숫자형 `id`는 원본 경계에서 `Long`으로 처리�
 호실 명단·전개도 분모·봉사 명단에 포함한다(DEC-026). 학생은 DataGSM 학생 id로 구분하고,
 처음 로그인할 때 그 학생에 계정을 연결하며 새로 만들지 않는다. 졸업·자퇴생과 필요한 값이 빠진 학생은 새로 저장하지 않고,
 목록에 없는 저장 학생은 삭제하지 않는다. 명단에 보이는 이름은 학생의 DataGSM 이름이다.
+DataGSM 학생 목록에 실제 학생이 아닌 데이터(예: 301호의 `사감선생님`)가 있으면 서버 설정의 제외 목록(DataGSM 학생 id)에 넣는다(DEC-034).
+제외 학생은 동기화가 새로 저장하거나 갱신하지 않고, 그 학생 계정의 로그인은 지원하지 않는 계정으로 거부한다. 이름으로 거르지 않는다.
+이미 저장된 제외 학생은 운영자가 한 번 직접 삭제한다.
 
-근거: SRC-DATAGSM, SRC-INTERVIEW, SRC-PRESTORE-STUDENTS.
+근거: SRC-DATAGSM, SRC-INTERVIEW, SRC-PRESTORE-STUDENTS, SRC-STUDENT-EXCLUSION.
 
 ### REQ-AUTH-003 — 역할과 접근 범위
 
