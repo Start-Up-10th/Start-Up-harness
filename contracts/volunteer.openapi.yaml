@@ -3,9 +3,9 @@ info:
   title: CheckUp 봉사 관리 API
   version: 1.0.0
   description: |
-    사감·기숙사 자치위원(관리자)의 봉사 관리 명단, 봉사 횟수 조정, 당일 봉사자 지정·완료 API다.
+    사감·기숙사 자치위원(관리자)의 봉사 관리 명단, 봉사 횟수 조정, 당일 봉사자 지정·완료·미이행 API다.
     제공자는 CheckUp-server(CheckUp-server#76), 소비자는 관리자 웹 봉사 관리 화면이다.
-    봉사는 기숙사 벌칙이고 봉사 횟수는 앞으로 해야 할 횟수다. 정책은 REQ-COM-001·002·006, DEC-020·021을 따른다.
+    봉사는 기숙사 벌칙이고 봉사 횟수는 앞으로 해야 할 횟수다. 정책은 REQ-COM-001·002·006, DEC-020·021·034를 따른다.
 
     - 인증: `SESSION` 쿠키(DEC-016). 웹은 `credentials: "include"`로 호출한다.
     - 모든 API는 관리자 전용이다. 관리자 여부는 요청마다 DB의 회원 역할로 판정한다.
@@ -24,7 +24,7 @@ tags:
   - name: 봉사 횟수 조정
     description: 봉사 `+1`(잘못했을 때) / `−1`(사감 감면)(REQ-COM-002)
   - name: 당일 봉사자
-    description: 오늘 봉사자 지정·취소·완료(REQ-COM-006)
+    description: 오늘 봉사자 지정·취소·완료·미이행과 날짜별 기록(REQ-COM-006, DEC-034)
 paths:
   /api/v1/volunteer:
     get:
@@ -232,7 +232,7 @@ paths:
     delete:
       tags: [당일 봉사자]
       summary: 당일 봉사자 지정 취소
-      description: 오늘 지정을 취소하고 그 지정의 봉사 알림을 지운다. 취소 알림은 만들지 않는다. 이미 완료한 지정은 취소할 수 없다.
+      description: 오늘 지정을 취소하고 그 지정의 봉사 알림을 지운다. 취소 알림은 만들지 않는다. 이미 완료했거나(`DUTY_ALREADY_COMPLETED`) 미이행으로 처리한(`DUTY_MISSED`) 지정은 취소할 수 없다(409).
       operationId: cancelVolunteerDuty
       parameters:
         - $ref: "#/components/parameters/StudentId"
@@ -267,7 +267,7 @@ paths:
         "404":
           $ref: "#/components/responses/NotOnDuty"
         "409":
-          description: 이미 완료했거나(`DUTY_ALREADY_COMPLETED`) 그 사이 봉사 횟수가 0이 됐다(`VOLUNTEER_COUNT_ZERO`).
+          description: 이미 완료했거나(`DUTY_ALREADY_COMPLETED`) 미이행으로 처리했거나(`DUTY_MISSED`) 그 사이 봉사 횟수가 0이 됐다(`VOLUNTEER_COUNT_ZERO`).
           content:
             application/json:
               schema:
@@ -275,6 +275,152 @@ paths:
               example:
                 code: DUTY_ALREADY_COMPLETED
                 message: 이미 봉사를 완료했습니다.
+  /api/v1/volunteer/{studentId}/duty/missed:
+    post:
+      tags: [당일 봉사자]
+      summary: 당일 봉사 미이행
+      description: |
+        오늘 지정을 지우지 않고 `MISSED`로 바꾸며 `delta`만큼 횟수를 바꾸고 사유와 함께 조정 이력(`kind=DUTY_MISSED`)에 남긴다(DEC-034).
+        상태 변경·조정 기록·횟수 변경은 한 트랜잭션이다. `delta`가 0이면 횟수는 그대로 두고 미이행만 기록한다(`adjusted: false`).
+        차감은 남은 횟수까지만 한다. 알림은 만들거나 지우지 않는다. 같은 `Idempotency-Key`의 재시도는 한 번만 반영한다.
+      operationId: markTodayVolunteerDutyMissed
+      parameters:
+        - $ref: "#/components/parameters/StudentId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VolunteerMissedRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/UpdatedItem"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/AdminOnly"
+        "404":
+          $ref: "#/components/responses/NotOnDuty"
+        "409":
+          $ref: "#/components/responses/MissedConflict"
+  /api/v1/volunteer/duties:
+    get:
+      tags: [당일 봉사자]
+      summary: 날짜별 당일 봉사자 기록
+      description: |
+        그 운영일에 지정된 학생을 호실 → 이름 → 학번순으로 돌려준다. 오늘 운영일도 같은 형태다.
+        운영일이 지났는데 완료·미이행 처리가 없던 지정은 `status: MISSED`, `adjusted: false`다. 오늘 처리 전 지정은 `ASSIGNED`다.
+        지정 취소는 지정을 지우므로 나오지 않는다. 지정이 없으면 빈 배열이다.
+      operationId: getVolunteerDutyRecords
+      parameters:
+        - name: date
+          in: query
+          required: false
+          description: 운영일(yyyy-MM-dd). 없으면 오늘 운영일. 형식이 틀리면 400
+          schema:
+            type: string
+            format: date
+          example: "2026-10-14"
+      responses:
+        "200":
+          description: 그날의 지정 기록
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VolunteerDutyRecordResponse"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/AdminOnly"
+  /api/v1/volunteer/duties/summary:
+    get:
+      tags: [당일 봉사자]
+      summary: 월 단위 미이행 요약
+      description: 그 달에서 미이행이 있는 운영일만 날짜순으로 담고, 값은 그날의 미이행 인원(횟수 처리됨 + 미처리)이다. 달력의 표시에 쓴다.
+      operationId: getVolunteerMissedSummary
+      parameters:
+        - name: month
+          in: query
+          required: true
+          description: 조회할 달(yyyy-MM). 없거나 형식이 틀리면 400
+          schema:
+            type: string
+            pattern: "^\\d{4}-\\d{2}$"
+          example: "2026-10"
+      responses:
+        "200":
+          description: 운영일 → 미이행 인원
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  minimum: 1
+              example:
+                "2026-10-13": 1
+                "2026-10-14": 2
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/AdminOnly"
+  /api/v1/volunteer/duties/{date}/{studentId}/missed:
+    patch:
+      tags: [당일 봉사자]
+      summary: 날짜별 미이행 처리
+      description: |
+        그날의 지정(처리 전 지정 또는 횟수 미처리 미이행)을 `MISSED`로 바꾸고 횟수·사유를 저장한다. 본문·재시도 키는 당일 봉사 미이행과 같다.
+        횟수를 이미 처리한 미이행은 409 `DUTY_ALREADY_ADJUSTED`이고, 그 뒤 조정은 일반 횟수 조정을 쓴다.
+      operationId: markVolunteerDutyMissed
+      parameters:
+        - name: date
+          in: path
+          required: true
+          description: 지정의 운영일(yyyy-MM-dd)
+          schema:
+            type: string
+            format: date
+        - $ref: "#/components/parameters/StudentId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VolunteerMissedRequest"
+      responses:
+        "200":
+          description: 처리 뒤 그날의 기록
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VolunteerDutyRecordResponse"
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "403":
+          $ref: "#/components/responses/AdminOnly"
+        "404":
+          description: 학생이 없거나(`STUDENT_NOT_FOUND`) 그날 지정되지 않았다(`DUTY_NOT_FOUND`).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: DUTY_NOT_FOUND
+                message: 그날 봉사자로 지정되지 않은 학생입니다.
+        "409":
+          $ref: "#/components/responses/MissedConflict"
 components:
   securitySchemes:
     sessionCookie:
@@ -327,7 +473,7 @@ components:
             code: ADMIN_ONLY
             message: 관리자만 사용할 수 있습니다.
     InvalidRequest:
-      description: "`Idempotency-Key`가 100자를 넘는다."
+      description: "`Idempotency-Key`가 100자를 넘거나 본문·날짜·달 형식이 틀렸다."
       content:
         application/json:
           schema:
@@ -371,7 +517,71 @@ components:
           example:
             code: DUTY_ALREADY_COMPLETED
             message: 이미 봉사를 완료했습니다.
+    MissedConflict:
+      description: |
+        완료한 지정이거나(`DUTY_ALREADY_COMPLETED`) 횟수를 이미 처리한 미이행이거나(`DUTY_ALREADY_ADJUSTED`),
+        차감인데 남은 횟수가 0이거나(`VOLUNTEER_COUNT_ZERO`) 재시도 키를 다른 요청에 썼다(`IDEMPOTENCY_KEY_REUSED`).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            code: DUTY_ALREADY_ADJUSTED
+            message: 이미 횟수를 처리한 미이행입니다. 학생 관리에서 횟수를 조정해 주세요.
   schemas:
+    VolunteerMissedRequest:
+      type: object
+      required: [delta]
+      properties:
+        delta:
+          type: integer
+          minimum: -99
+          maximum: 99
+          description: 바꿀 횟수. 0이면 횟수는 그대로 두고 미이행만 기록한다. 차감은 남은 횟수까지만 한다
+          example: 1
+        reason:
+          type: [string, "null"]
+          maxLength: 100
+          description: 사유(선택). 학생 개인정보는 넣지 않는다. 앞뒤 공백을 지우고 비어 있으면 저장하지 않는다
+          example: 당일 봉사 미이행
+    VolunteerDutyRecordResponse:
+      type: object
+      required: [studentId, studentNumber, name, status, adjusted]
+      properties:
+        studentId:
+          type: integer
+          format: int64
+          description: DataGSM 학생 id
+        studentNumber:
+          type: integer
+          description: 학번
+        name:
+          type: string
+        dormitoryRoom:
+          type: [integer, "null"]
+          description: 호실. 미배정이면 null
+        status:
+          type: string
+          enum: [ASSIGNED, COMPLETED, MISSED]
+          description: 그날 지정 상태. 운영일이 지났는데 처리가 없던 지정은 MISSED다. ASSIGNED는 오늘 처리 전 지정뿐이다
+        adjusted:
+          type: boolean
+          description: 미이행으로 횟수를 처리했는지
+        addedCount:
+          type: [integer, "null"]
+          description: 미이행으로 실제로 바꾼 횟수. 처리 전이면 null, 음수일 수 있다
+        reason:
+          type: [string, "null"]
+          description: 미이행 처리 사유. 없으면 null
+      example:
+        studentId: 3203
+        studentNumber: 3203
+        name: 류하준
+        dormitoryRoom: 302
+        status: MISSED
+        adjusted: true
+        addedCount: 1
+        reason: 당일 봉사 미이행
     VolunteerAdjustmentResponse:
       type: object
       required: [createdAt, delta, requestedDelta, kind]
@@ -390,11 +600,11 @@ components:
           example: -5
         reason:
           type: [string, "null"]
-          description: 사유. 남기지 않았으면 null. 당일 봉사 완료(DUTY_COMPLETION)는 항상 null
+          description: 사유. 남기지 않았으면 null. 당일 봉사 완료(DUTY_COMPLETION)는 항상 null, 미이행(DUTY_MISSED)은 처리할 때 남긴 사유
         kind:
           type: string
-          enum: [ADMIN, DUTY_COMPLETION]
-          description: 조정 종류. ADMIN은 관리자 +/−·여러 회 조정, DUTY_COMPLETION은 당일 봉사 완료로 생긴 -1. 사유가 없으면 웹은 종류별 기본 문구를 활동명으로 보인다(DEC-030)
+          enum: [ADMIN, DUTY_COMPLETION, DUTY_MISSED]
+          description: 조정 종류. ADMIN은 관리자 +/−·여러 회 조정, DUTY_COMPLETION은 당일 봉사 완료로 생긴 -1, DUTY_MISSED는 당일 봉사 미이행으로 바꾼 횟수(DEC-034). 사유가 없으면 웹은 종류별 기본 문구를 활동명으로 보인다(DEC-030)
           example: ADMIN
     VolunteerAdjustRequest:
       type: object
@@ -439,9 +649,9 @@ components:
           description: 마지막 횟수 조정 시각. 조정한 적 없으면 null(화면은 `-`)
         todayDuty:
           type: [string, "null"]
-          enum: [ASSIGNED, COMPLETED, null]
+          enum: [ASSIGNED, COMPLETED, MISSED, null]
           description: |
-            오늘 당일 봉사자 지정 상태. 웹은 null이면 "당일 봉사자 지정", ASSIGNED면 "지정됨(취소)·완료", COMPLETED면 "완료됨"을 보여준다.
+            오늘 당일 봉사자 지정 상태. 웹은 null이면 "당일 봉사자 지정", ASSIGNED면 "지정됨(취소)·완료·미이행", COMPLETED면 "완료됨", MISSED면 "미이행"을 보여준다.
       example:
         studentId: 200
         name: 학생
