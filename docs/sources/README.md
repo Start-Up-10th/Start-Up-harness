@@ -41,6 +41,7 @@
 | SRC-VOLUNTEER-KIND | 사용자 2026-10-06: #176(프론트 요청, 봉사 이력 활동명) 방식 질문에 `B안`(조정 종류를 응답에 넣고 프론트가 종류별 기본 문구) 선택 | community 명세 REQ-COM-002, DEC-030 |
 | SRC-FACE-RECENT | 사용자 2026-10-06: #143 최근 인식 기록의 조회 범위와 실패 기록 시점을 추천안대로(`#143 추천대로`) 결정 — 그 관리자가 연 세션 기록만, 못 알아본 얼굴은 AI의 QR 안내 때만 한 줄 | face 명세 REQ-FACE-007, DEC-029 |
 | SRC-VOLUNTEER-ADJUST | 사용자 2026-10-06: #139(프론트 요청) 정책 질문에 사유 `선택`, 한 번에 조정 `1~99회`, 남은 횟수보다 많이 빼면 `0까지만`, 기존 increase·decrease API `유지` 선택 | community 명세 REQ-COM-002, DEC-027 |
+| SRC-VOLUNTEER-MISSED | CheckUp-server#250(웹 담당 요청): 기자위 선배 확인 `당일 봉사자로 지정됐는데 봉사를 하지 않고 사라진 학생(미이행)은 봉사 횟수가 추가된다`, 날짜별 기록·달력·미이행 처리 흐름. 사용자 2026-10-15 서버 정책안(지정 보존·자동 미이행·CANCELLED 없음·알림 유지·학생 내역 제외) 승인 | community 명세 REQ-COM-006, DEC-034 |
 | SRC-HANDOFF | 이 작업 직전 assistant의 16개 절 전체 명세 + AGENTS 제안 | 통합 기준으로 유지하되 assistant 추론은 직접 사용자 결정과 구분 |
 | SRC-CORRECTIONS | 아래 정정 목록 | 구안 복구 방지 |
 

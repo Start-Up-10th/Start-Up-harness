@@ -28,7 +28,7 @@
 
 ## 봉사 관리 (구현됨)
 
-- [volunteer.openapi.yaml](volunteer.openapi.yaml): `GET /api/v1/volunteer`, `PATCH /api/v1/volunteer/{studentId}/count/increase|decrease`, `POST|DELETE /api/v1/volunteer/{studentId}/duty`, `POST /api/v1/volunteer/{studentId}/duty/complete`
+- [volunteer.openapi.yaml](volunteer.openapi.yaml): `GET /api/v1/volunteer`, `PATCH /api/v1/volunteer/{studentId}/count/increase|decrease`, `POST|DELETE /api/v1/volunteer/{studentId}/duty`, `POST /api/v1/volunteer/{studentId}/duty/complete`, 미이행 `POST /api/v1/volunteer/{studentId}/duty/missed`·`PATCH /api/v1/volunteer/duties/{date}/{studentId}/missed`, 날짜별 기록 `GET /api/v1/volunteer/duties`, 월 요약 `GET /api/v1/volunteer/duties/summary`(DEC-034)
 - 제공자: CheckUp-server([CheckUp-server#76](https://github.com/Start-Up-10th/CheckUp-server/pull/76)). 소비자: 관리자 웹 봉사 관리 화면. 정책은 REQ-COM-001·002·006, DEC-020·021, 세부는 [봉사 관리 계획](../docs/plans/volunteer-management.md).
 - 경로의 `studentId`는 DataGSM 학생 id다. 조정에는 선택 헤더 `Idempotency-Key`를 쓴다. 학생 본인 남은 횟수는 `GET /api/v1/users/{studentId}/volunteer`, 완료 내역은 `GET /api/v1/users/{studentId}/volunteer/history`(`{ studentId, history: [{ operatingDay, completedAt }] }`, [CheckUp-server#120](https://github.com/Start-Up-10th/CheckUp-server/pull/120))다. 소비자: 학생 웹 `/volunteer`.
 

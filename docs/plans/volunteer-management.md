@@ -14,6 +14,10 @@
 | `POST /api/v1/volunteer/{studentId}/duty` | 오늘 당일 봉사자 지정 + 봉사 알림. 봉사 0회면 409 `봉사가 없습니다.` |
 | `DELETE /api/v1/volunteer/{studentId}/duty` | 지정 취소 + 알림 삭제. 완료 후에는 409 |
 | `POST /api/v1/volunteer/{studentId}/duty/complete` | 봉사 완료 + `−1`. 한 번만 반영 |
+| `POST /api/v1/volunteer/{studentId}/duty/missed` | 오늘 지정 미이행 + 횟수·사유(`{delta, reason}`). `Idempotency-Key` 헤더(선택) |
+| `GET /api/v1/volunteer/duties?date=` | 날짜별 당일 봉사자 기록. 상태·`adjusted`·`addedCount`·`reason` |
+| `GET /api/v1/volunteer/duties/summary?month=` | 월 단위 미이행 요약 `{ "yyyy-MM-dd": 인원 }` |
+| `PATCH /api/v1/volunteer/duties/{date}/{studentId}/missed` | 그날 횟수 미처리 미이행 처리. 이미 처리했으면 409 |
 
 ## 구현
 
@@ -23,6 +27,7 @@
 - 검색은 숫자면 호실·학번 정확 일치, 그 밖에는 이름 포함 → 초성 → 자음·모음 오타 1개 순이다. 외부 검색 엔진 없이 서버에서 거르고 정렬한다.
 - 당일 봉사자(`volunteer_duty`, 학생·운영일 unique)는 봉사 1회 이상인 학생만 지정한다. 지정할 때 같은 트랜잭션에서 `VOLUNTEER` 알림(원본 `duty:<운영일>`)을 만들고 취소하면 지운다.
 - 완료는 지정을 완료로 바꾸고 `−1` 기록·차감을 한 트랜잭션에서 한다. 완료한 지정은 취소할 수 없다.
+- 미이행(CheckUp-server#250, DEC-034)은 지정을 잠그고 `MISSED`로 바꾸며, 횟수를 바꿀 때는 그 지정에 연결한 `DUTY_MISSED` 조정 기록(지정당 하나, partial unique)과 횟수 변경을 한 트랜잭션에서 한다. 운영일이 지난 `ASSIGNED`는 조회할 때 미이행(횟수 미처리)으로 본다.
 - 학생 본인 남은 횟수 조회는 `GET /api/v1/users/{studentId}/volunteer`(CheckUp-server#69)이다.
 - 학생 본인 봉사 완료 내역은 `GET /api/v1/users/{studentId}/volunteer/history`(CheckUp-server#120): `{ studentId, history: [{ operatingDay, completedAt }] }`, 완료(`COMPLETED`)만 최신 운영일부터. 권한은 횟수 조회와 같다(본인·관리자, 다른 학생 403, 없는 학생 404). DEC-024.
 
@@ -39,8 +44,9 @@
 ## 기준·검증
 
 - 요구사항: `REQ-AUTH-003`, `REQ-COM-001~006`, `REQ-UI-004~006`
-- 수용 시나리오: `ACC-AUTH-003`, `ACC-COM-001~006`, `ACC-UI-004~006`
+- 수용 시나리오: `ACC-AUTH-003`, `ACC-COM-001~007`, `ACC-UI-004~006`
 - 일반 학생이 봉사 명단·타인 횟수·관리 mutation을 호출하지 못하게 한다.
 - 두 번의 새 클릭, 동일 요청 재전송, 다른 요청에 재사용한 키를 구분한다.
 - 봉사 횟수와 당일 봉사자 지정은 08:00 출석 정리 때 삭제하지 않는다.
 - 지정·중복 지정·취소 때 알림이 한 번 생기고 취소 후 사라지는지, 완료가 한 번만 차감되는지 확인한다.
+- 미이행이 지정을 지우지 않고 횟수를 한 번만 바꾸는지, 완료·미이행이 서로 바뀌지 않는지 확인한다(ACC-COM-007).
