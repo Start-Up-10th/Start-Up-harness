@@ -112,5 +112,6 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 | 2026-10-04 | 학생 봉사 활동 결정 반영 | 사용자 결정(남은 횟수 + 완료 내역)을 REQ-COM-003·ACC-COM-003·DEC-024·SRC-VOLUNTEER-REMAINING에, 완료 내역 API(CheckUp-server#120)를 봉사 계획·계약에 기록. 이전 "남은 횟수만, 활동 목록 없음"을 대체 |
 | 2026-10-05 | 관리자 허용 목록 결정 반영 | 개발·테스트용 관리자 허용 목록(`CHECKUP_ADMIN_DATAGSM_IDS`)을 REQ-AUTH-003, ACC-AUTH-003, DEC-025, SRC-ADMIN-ALLOWLIST에 반영. 서버 구현은 CheckUp-server#133 테스트로 확인, 배포 설정은 #134, 실서버 확인은 없음 |
 | 2026-10-15 | 당일 봉사 미이행 반영 | CheckUp-server#250(웹 요청) 미이행 정책을 REQ-COM-006·ACC-COM-007·DEC-034·SRC-VOLUNTEER-MISSED에, 미이행 처리·날짜별 기록·월 요약 API를 봉사 계획·`contracts/volunteer.openapi.yaml`에 기록. 서버 구현은 CheckUp-server#251 테스트(빈 PostgreSQL `./gradlew clean build`)로 확인, 웹 연동·실서버 확인은 없음 |
+| 2026-10-27 | 학생 출석 접수 여부 API 반영 | CheckUp-server#260(웹 요청, CheckUp-Client#357)의 `GET /api/v1/attendance/active`를 `contracts/README.md`에 기록. QR은 용도별 살아 있는 세션, 얼굴은 학생 본인 층 활성 세션을 센다(REQ-ATT-001, CheckUp-server#257). 서버 구현은 CheckUp-server#261 관련 테스트로 확인, 웹 연동·실서버 확인은 없음 |
 
 현재 변경은 명세·계획 문서뿐이며 제품 API·웹·AI·배포 구현은 수행하지 않았다.
