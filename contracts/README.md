@@ -38,6 +38,14 @@
 - 제공자: CheckUp-server. 소비자: 관리자 웹 QR 화면, 학생 웹 `/qr`. 정책은 [QR 계획](../docs/plans/qr-attendance.md), DEC-018.
 - 시각 필드는 ISO-8601 UTC 문자열이다.
 
+## 학생 출석 접수 여부 (구현됨)
+
+- `GET /api/v1/attendance/active`: 로그인한 학생 기준 `{ "dormitory": boolean, "studyRoom": boolean }`. 용도별로 지금 출석을 받는 세션이 하나라도 있으면 true다.
+  - QR: 그 용도의 lease가 남은 QR 세션. 층을 가리지 않는다.
+  - 얼굴: 그 용도로 학생 본인 층을 맡은 활성 얼굴 인식 세션([CheckUp-server#257](https://github.com/Start-Up-10th/CheckUp-server/pull/257)). 층이 없는 예전 세션은 모든 층으로 센다. 호실이 없는 학생은 얼굴 세션을 세지 않는다.
+- 세션 id·관리자·토큰은 주지 않는다. 출석 시간표는 없다(REQ-ATT-001, REQ-SCOPE-003). 미로그인 401, 학생 정보가 없는 계정 403 `MISSING_STUDENT_INFO`.
+- 제공자: CheckUp-server([CheckUp-server#261](https://github.com/Start-Up-10th/CheckUp-server/pull/261)). 소비자: 학생 웹 홈(CheckUp-Client#357). 웹은 화면 진입·복귀(`visibilitychange`) 때 부른다.
+
 ## 얼굴 등록·인식 (Spring 구현됨, 제품 통합 미확인)
 
 - [face.openapi.yaml](face.openapi.yaml): 학생 동의 확인·상태·최초 등록과 관리자 카메라 인식 세션 API.
