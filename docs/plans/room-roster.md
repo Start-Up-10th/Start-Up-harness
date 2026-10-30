@@ -4,6 +4,7 @@
 
 - 담당자: 임서하
 - `GET /api/v1/room/student?dormitoryRoom={호실}&purpose={DORMITORY|STUDY_ROOM}` — 계약: [room.openapi.yaml](../../contracts/room.openapi.yaml)
+- `GET /api/v1/room/floor/students?floor={층}&purpose={DORMITORY|STUDY_ROOM}` — 관리자 층별 학생 일괄 조회, 같은 계약에 정의(CheckUp-server#268, Client#394).
 
 ## 구현
 
@@ -21,6 +22,7 @@
 
 - [ ] GET body의 `student_room_id` 호환성을 확인한다.
 - [ ] 단일 호실 조회 API가 관리자 층 전개도 전체 조회를 충족하는지 확인한다.
+- [x] 호실별 반복 요청을 피하는 별도 `/room/floor/students` 계약을 정의한다. 기존 `/room/floor` 집계는 유지한다. 층 명단은 단일 scalar projection 쿼리로 읽고 호실 번호·학생 이름·학번·내부 id 순으로 정렬한다. 호실 상세와 같은 DataGSM 학생 id 기준과 학생 필드를 쓴다.
 - [ ] `GET https://openapi.datagsm.kr/v1/students`의 `STUDENT_READ` 권한, API 키 주입, 페이지네이션 응답을 확인한다.
 - [ ] 학생 OpenAPI의 졸업생·자퇴생 필터와 호실 변경 신호를 확인한다.
 - [ ] 호실별 수동 출석 저장 API가 없어 `REQ-ATT-006`을 완료 처리하지 않는다.
@@ -35,3 +37,13 @@
 - `attended`가 요청한 용도·오늘 운영일만 반영하고 다른 용도·지난 운영일·수동 미출석을 출석으로 세지 않는지 확인한다(서버 `AttendanceRepositoryTest`, 실제 PostgreSQL).
 - 관리자와 학생의 응답 범위·읽기 전용/편집 권한을 구분한다.
 - 호실 인원 분모가 DataGSM 배정 수와 일치하는지 확인한다.
+
+## 층별 학생 조회 구현·검증 (2026-10-30)
+
+- 관련 REQ: `REQ-UI-001~002`, `REQ-AUTH-003`, `REQ-ATT-001·007`. 관련 수용 시나리오: `ACC-UI-001~002`, `ACC-AUTH-003`, `ACC-ATT-007`.
+- 서버 구현: `RoomController.getFloorStudents`, `RoomService.getFloorStudents`, `AttendanceRepository.findFloorStudents`, `FloorStudentAttendance`, `RoomFloorStudentsResponse`.
+- 서버 테스트: `RoomControllerTest`(응답·기본/명시 용도·401/403·잘못된 입력), `RoomFloorStudentsServiceTest`(정렬·빈 층·권한 선검증·08:00 경계), `FloorStudentAttendanceRepositoryTest`(PostgreSQL 범위·용도·운영일·수동 미출석·미로그인 학생·SQL 한 문장과 엔티티 추가 로딩 없음).
+- 검증: Windows, Microsoft JDK 25.0.4.1, 격리된 로컬 PostgreSQL 17·Redis 7에서 `./gradlew.bat build --console=plain` 통과(682개 중 680 통과, 실패 0, 기존 실서버 AI·부하 테스트 2개 비활성). 새 테스트 12개는 모두 실행·통과했다. CI와 같은 개발용 DataGSM/AI 환경 값과 `PUBLIC_ORIGIN=http://localhost:3000`을 사용했으며 실제 외부 API는 호출하지 않았다.
+- 첫 실행에서 새 테스트 전용 Spring 컨텍스트가 DB 연결 한도를 넘겨 통계 활성화를 메서드 안에서만 켜고 복구하도록 수정했다. 재실행 중 Windows JDK의 C2 CompilerThread가 access violation으로 종료되어 로컬 실행에만 `JAVA_TOOL_OPTIONS=-XX:TieredStopAtLevel=1`을 사용했다. 서버/CI JVM 설정은 변경하지 않았다.
+- `npm run harness:check` 통과(하네스 테스트 20개). 프런트 연동·브라우저 전개도는 이번 서버 변경 범위가 아니므로 수용 시나리오 전체를 verified로 올리지 않는다.
+- 다음 작업: Client#394에서 이 API로 호실별 반복 요청을 대체하고 실제 전개도 표시·새로고침 동선을 확인한다. 지난 날짜 보관(#269)과 연속 봉사(#270)는 정책 결정이 필요해 이 변경에 포함하지 않는다.
