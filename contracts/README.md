@@ -25,6 +25,7 @@
 - [room.openapi.yaml](room.openapi.yaml): `GET /api/v1/room/student?dormitoryRoom=&purpose=`
 - 제공자: CheckUp-server([CheckUp-server#101](https://github.com/Start-Up-10th/CheckUp-server/pull/101)에서 `attended`·`purpose` 추가). 소비자: 학생 웹 홈 `내 호실` 카드, 관리자 호실 상세. 정책은 REQ-UI-003, REQ-ATT-001, DEC-023, 세부는 [호실 명단 계획](../docs/plans/room-roster.md).
 - `attended`는 `purpose`(기본 `DORMITORY`)의 오늘 운영일 출석 상태다. 학생은 본인 호실만 조회한다.
+- 관리자 전개도 일괄 조회: `GET /api/v1/room/floor/students?floor=&purpose=`. 응답은 `{ floor, purpose, rooms: [{ dormitoryRoom, students: [{ student_id, student_name, student_class, student_number, attended }] }] }`다. 학생·출석을 단일 쿼리로 읽고 호실 번호·학생 이름순으로 준다. 제공자: CheckUp-server#268, 소비자: CheckUp-Client#394. 기존 층 집계 API와 학생 본인 호실 API는 유지한다.
 
 ## 봉사 관리 (구현됨)
 
