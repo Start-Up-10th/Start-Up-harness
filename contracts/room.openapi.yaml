@@ -3,7 +3,7 @@ info:
   title: CheckUp 호실 명단 API
   version: 1.3.0
   description: |
-    호실 학생 명단과 오늘 출석 여부 조회 API다. 제공자는 CheckUp-server, 소비자는 학생 웹 홈 `내 호실` 카드와 관리자 호실 상세다.
+    호실 학생 명단·운영일별 출석 조회·관리자 수동 출석 변경 API다. 제공자는 CheckUp-server, 소비자는 학생 웹 홈 `내 호실` 카드와 관리자 호실 상세·전개도다.
     정책은 REQ-UI-003, REQ-ATT-001, DEC-023, 세부는 [호실 명단 계획](../docs/plans/room-roster.md)을 따른다.
 
     - 인증: `SESSION` 쿠키(DEC-016). 웹은 `credentials: "include"`로 호출한다.
@@ -339,7 +339,7 @@ components:
           description: 표시용 학번
         attended:
           type: boolean
-          description: 요청 용도의 오늘 운영일 현재 출석 여부
+          description: 요청한 용도·운영일의 출석 여부. 과거 운영일은 보관 요약 상태다.
     RoomStudentResponse:
       type: object
       required: [student_name, student_class, student_number, attended]
