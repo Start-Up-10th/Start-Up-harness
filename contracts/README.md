@@ -25,6 +25,14 @@
 - [room.openapi.yaml](room.openapi.yaml): `GET /api/v1/room/student?dormitoryRoom=&purpose=`
 - 제공자: CheckUp-server([CheckUp-server#101](https://github.com/Start-Up-10th/CheckUp-server/pull/101)에서 `attended`·`purpose` 추가). 소비자: 학생 웹 홈 `내 호실` 카드, 관리자 호실 상세. 정책은 REQ-UI-003, REQ-ATT-001, DEC-023, 세부는 [호실 명단 계획](../docs/plans/room-roster.md).
 - `attended`는 `purpose`(기본 `DORMITORY`)의 오늘 운영일 출석 상태다. 학생은 본인 호실만 조회한다.
+- 관리자 전개도 일괄 조회: `GET /api/v1/room/floor/students?floor=&purpose=`. 응답은 `{ floor, purpose, rooms: [{ dormitoryRoom, students: [{ student_id, student_name, student_class, student_number, attended }] }] }`다. 학생·출석을 단일 쿼리로 읽고 호실 번호·학생 이름순으로 준다. 제공자: CheckUp-server#268, 소비자: CheckUp-Client#394. 기존 층 집계 API와 학생 본인 호실 API는 유지한다.
+- 관리자의 호실 수동 출석 저장은 `PUT /api/v1/room/{dormitoryRoom}/attendance?purpose=`를 쓴다. 본문은 `students: [{ studentId, attended }]`이며 DataGSM 학생 id를 사용한다. 개별 학생 수정은 `PUT /api/v1/room/student/{studentId}/attendance`다. 둘 다 오늘 운영일만 변경할 수 있으며 과거 날짜는 조회 전용이다. 계약은 [room.openapi.yaml](room.openapi.yaml)에 있다.
+
+## 학생 본인 출석 (구현됨)
+
+- `GET /api/v1/attendance/me`: 로그인 학생 본인의 오늘 운영일 기숙사·자습실 출석 상태를 반환한다. 다른 학생 id를 받지 않는다. 기록이 없으면 미출석이며 수동 출석이면 인증 시각이 null일 수 있다.
+- `GET /api/v1/attendance/active`: 용도별 현재 출석 접수 여부를 반환한다.
+- 제공자: CheckUp-server. 소비자: 학생 웹 홈. 상세는 [학생 출석 계획](../docs/plans/student-attendance.md).
 
 ## 봉사 관리 (구현됨)
 
@@ -74,3 +82,9 @@
 - 오류 코드와 UI 문구를 분리하여 권한·만료·중복·일시 장애를 구별.
 
 계약 변경 시 제공자/소비자와 시나리오를 같은 변경에서 갱신한다. 예제에는 실제 이름·학번·벡터·secret을 넣지 않는다.
+
+## 날짜별 출석 요약·연속 봉사 (2026-10-30)
+
+- `room.openapi.yaml`: 관리자 `room/floor`, `room/floor/students`, `room/attendance`에 `date`(운영일) 추가. 기본 오늘, 지난 30개 운영일 요약만 조회하며 미래·범위 밖은 400. 과거 수정은 제공하지 않는다.
+- `volunteer.openapi.yaml`: `PATCH /api/v1/volunteer/{studentId}/consecutive/count`는 `{ delta, reason }`와 선택 `Idempotency-Key`를 받아 일반 봉사와 별도 잔여를 조정한다. 명단과 날짜별 기록은 `consecutiveVolunteerCount`, `consecutiveDuty`를 추가한다. 본인 횟수 `GET /api/v1/users/{studentId}/volunteer`도 `consecutiveVolunteerCount`를 추가한다.
+- 자동 지정은 기숙사 얼굴·QR 유효 인증에만 연결되고 완료 확인 때 연속 잔여를 1 차감한다. 미출석일은 건너뛴다. 기존 지정은 변경하지 않는다. 정책은 DEC-035·036, 소비자는 Client#395·396이다. 웹 반영·운영 연동은 별도 검증한다.

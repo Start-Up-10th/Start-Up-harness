@@ -113,5 +113,25 @@ CI/CD 구성·정적 검사는 서비스 개발 전에 준비할 수 있고, 테
 | 2026-10-05 | 관리자 허용 목록 결정 반영 | 개발·테스트용 관리자 허용 목록(`CHECKUP_ADMIN_DATAGSM_IDS`)을 REQ-AUTH-003, ACC-AUTH-003, DEC-025, SRC-ADMIN-ALLOWLIST에 반영. 서버 구현은 CheckUp-server#133 테스트로 확인, 배포 설정은 #134, 실서버 확인은 없음 |
 | 2026-10-15 | 당일 봉사 미이행 반영 | CheckUp-server#250(웹 요청) 미이행 정책을 REQ-COM-006·ACC-COM-007·DEC-034·SRC-VOLUNTEER-MISSED에, 미이행 처리·날짜별 기록·월 요약 API를 봉사 계획·`contracts/volunteer.openapi.yaml`에 기록. 서버 구현은 CheckUp-server#251 테스트(빈 PostgreSQL `./gradlew clean build`)로 확인, 웹 연동·실서버 확인은 없음 |
 | 2026-10-27 | 학생 출석 접수 여부 API 반영 | CheckUp-server#260(웹 요청, CheckUp-Client#357)의 `GET /api/v1/attendance/active`를 `contracts/README.md`에 기록. QR은 용도별 살아 있는 세션, 얼굴은 학생 본인 층 활성 세션을 센다(REQ-ATT-001, CheckUp-server#257). 서버 구현은 CheckUp-server#261 관련 테스트로 확인, 웹 연동·실서버 확인은 없음 |
+| 2026-10-30 | 앱 첫 화면 라우팅 문서 반영 | CheckUp-Client#142의 `/` PWA 시작 경로 인증 상태별 이동을 REQ-UI-007·ACC-UI-007·SRC-APP-START에 기록. PR 보고 기준 headless Chrome 경로 테스트는 통과, 실제 설치 기기의 PWA 실행은 미검증 |
+| 2026-10-30 | 하네스 API·첫 화면 문서 이슈 #23 정리 | 얼굴 공개·내부 API 계약과 처리 흐름은 기존 `face.openapi.yaml`·얼굴 계획을 확인했다. 층별 명단은 CheckUp-server#268·CheckUp-Client#394 계약, 관리자 호실 출석 수정 두 경로와 날짜 쓰기 제한은 `room.openapi.yaml`·호실 계획에 기록했다. 학생 출석 계획·계약 요약에 실제 `/attendance/me`·`/active` 경로를 반영했다. CheckUp-Client#142를 근거로 REQ-UI-007·ACC-UI-007을 추가했다. 제품 경로는 Client PR의 기존 headless Chrome 검증을 인용하고, 실제 PWA 설치 동작은 미검증으로 남겼다. |
 
 현재 변경은 명세·계획 문서뿐이며 제품 API·웹·AI·배포 구현은 수행하지 않았다.
+
+### 2026-10-30 — 서버 층별 학생 출석 일괄 조회 (#268)
+
+- `/api/v1/room/floor/students`를 관리자 전용 단일 쿼리 API로 구현하고 계약을 추가했다. 기존 층 집계 API는 유지한다.
+- 서버 전체 빌드와 새 테스트 12개, 하네스 검사 20개가 통과했다. 전체 서버 테스트는 680 통과·실서버 AI/부하 2개 비활성이다.
+- 구현 파일·재현 환경·검증 범위·다음 Client#394 연동은 [호실 명단 계획](room-roster.md)의 실행 기록에 남겼다. 브라우저 E2E는 미검증이다.
+
+
+## 2026-10-30 — #269·#270 구현
+
+- 사용자 승인: DEC-035(출석 요약 30일), DEC-036(출석일 연속 봉사).
+- [x] 명세·출처·수용 시나리오 갱신.
+- [x] #269: 원본 08:00 폐기 유지, 요약 저장·만료 삭제·관리자 날짜 조회.
+- [x] #270: 별도 잔여 조정·기숙사 얼굴/QR 자동 지정·완료 차감·응답.
+- [x] PostgreSQL 통합·권한·경계·동시성 테스트, 전체 서버 빌드(692 통과·2 비활성), 하네스 검사(20 통과).
+- 실제 웹 연동·최종 학교 동의 전문 적용·운영 배포는 이 서버 작업에서 검증하지 않는다.
+
+검증 환경·명령·구현 근거·미검증 범위: [서버 #269·#270 검증](../reviews/server-remaining-issues-2026-10-30.md).
