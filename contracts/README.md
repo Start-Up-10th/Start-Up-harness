@@ -75,3 +75,9 @@
 - 오류 코드와 UI 문구를 분리하여 권한·만료·중복·일시 장애를 구별.
 
 계약 변경 시 제공자/소비자와 시나리오를 같은 변경에서 갱신한다. 예제에는 실제 이름·학번·벡터·secret을 넣지 않는다.
+
+## 날짜별 출석 요약·연속 봉사 (2026-10-30)
+
+- `room.openapi.yaml`: 관리자 `room/floor`, `room/floor/students`, `room/attendance`에 `date`(운영일) 추가. 기본 오늘, 지난 30개 운영일 요약만 조회하며 미래·범위 밖은 400. 과거 수정은 제공하지 않는다.
+- `volunteer.openapi.yaml`: `PATCH /api/v1/volunteer/{studentId}/consecutive/count`는 `{ delta, reason }`와 선택 `Idempotency-Key`를 받아 일반 봉사와 별도 잔여를 조정한다. 명단과 날짜별 기록은 `consecutiveVolunteerCount`, `consecutiveDuty`를 추가한다. 본인 횟수 `GET /api/v1/users/{studentId}/volunteer`도 `consecutiveVolunteerCount`를 추가한다.
+- 자동 지정은 기숙사 얼굴·QR 유효 인증에만 연결되고 완료 확인 때 연속 잔여를 1 차감한다. 미출석일은 건너뛴다. 기존 지정은 변경하지 않는다. 정책은 DEC-035·036, 소비자는 Client#395·396이다. 웹 반영·운영 연동은 별도 검증한다.

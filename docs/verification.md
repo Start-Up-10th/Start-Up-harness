@@ -68,3 +68,7 @@ GitHub Actions의 조건부 건너뜀은 required check에서도 성공 상태�
 Claude 실행·두 도구의 별도 새 세션 작업, GitHub Actions 원격 실행, DataGSM, 카메라, GSM SV 배포는 로컬 하네스 검사 대상이 아니다.
 마지막 로컬 검사 결과는 [개발 계획](plans/implementation.md)에 남긴다.
 2026-09-23의 외부 사례 비교·로컬 재현 결과와 미검증 범위는 [하네스 평가](reviews/harness-assessment-2026-09-23.md)에 기록한다.
+
+## 2026-10-30 서버 출석 요약·연속 봉사
+
+서버에서 ./gradlew.bat build --console=plain, 하네스에서 npm run harness:check를 실행했다. 전체 서버 692 통과·2 비활성, 하네스 20 통과. 환경·신규 DB 마이그레이션·시간/권한/동시성 검증과 미검증 범위는 [검증 기록](reviews/server-remaining-issues-2026-10-30.md)을 따른다. 웹 E2E와 운영 배포는 검증하지 않았다.

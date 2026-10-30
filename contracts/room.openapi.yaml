@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: CheckUp 호실 명단 API
-  version: 1.1.0
+  version: 1.2.0
   description: |
     호실 학생 명단과 오늘 출석 여부 조회 API다. 제공자는 CheckUp-server, 소비자는 학생 웹 홈 `내 호실` 카드와 관리자 호실 상세다.
     정책은 REQ-UI-003, REQ-ATT-001, DEC-023, 세부는 [호실 명단 계획](../docs/plans/room-roster.md)을 따른다.
@@ -28,11 +28,14 @@ paths:
         각 호실 학생은 호실 상세와 같은 이름(유니코드 가나다순)·학번·내부 id 순이다.
         학생 필드는 `/api/v1/room/attendance`와 같고 `student_id`는 내부 DB id가 아닌 DataGSM 학생 id다.
         호실 상세와 같이 DataGSM 학생 id가 없는 학생은 제외한다. 로그인 전 동기화된 학생도 포함한다.
-        `attended`는 요청한 용도의 오늘 운영일(08:00 KST 경계) 현재 상태다.
+        `attended`는 요청한 용도·date(기본 오늘 운영일, 08:00 KST 경계)의 상태다.
+        과거는 출입 시각 없는 요약만 지난 30개 운영일까지 조회한다. 도입 전 폐기 기록은 복원하지 않는다.
+        과거의 호실 배정으로 묶고 이름·학번은 현재 학생 정보다. 과거 수정은 허용하지 않는다.
         행이 없거나 수동 미출석이면 false이며 다른 용도·지난 운영일 기록은 반영하지 않는다.
         학생이 없는 호실은 생략하고 빈 층은 `rooms: []`다. 기존 `/room/floor` 집계 응답은 유지한다.
       operationId: getFloorStudents
       parameters:
+        - $ref: "#/components/parameters/OperatingDate"
         - name: floor
           in: query
           required: true
@@ -89,6 +92,66 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/room/floor:
+    get:
+      tags: [호실]
+      summary: 관리자 층별 출석 집계
+      description: 오늘은 현재 명단, 과거는 당시 호실별 출석 요약이다. 과거 수정 불가. 학생은 조회 불가.
+      parameters:
+        - $ref: "#/components/parameters/OperatingDate"
+        - name: floor
+          in: query
+          required: true
+          schema: { type: integer, minimum: 1, maximum: 99 }
+        - name: purpose
+          in: query
+          schema: { type: string, enum: [DORMITORY, STUDY_ROOM], default: DORMITORY }
+      responses:
+        "200":
+          description: 층별 집계
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [floor, purpose, attended, absent, rooms]
+                properties:
+                  floor: { type: integer }
+                  purpose: { type: string, enum: [DORMITORY, STUDY_ROOM] }
+                  attended: { type: integer }
+                  absent: { type: integer }
+                  rooms:
+                    type: array
+                    items:
+                      type: object
+                      required: [dormitoryRoom, attended, assigned]
+                      properties:
+                        dormitoryRoom: { type: integer }
+                        attended: { type: integer }
+                        assigned: { type: integer }
+        "400": { description: 잘못된 층·용도·날짜 또는 보관 범위 밖 날짜(INVALID_REQUEST) }
+        "401": { description: 비로그인 }
+        "403": { description: 관리자 전용(ADMIN_ONLY) }
+  /api/v1/room/attendance:
+    get:
+      tags: [호실]
+      summary: 관리자 날짜별 호실 기숙사 출석 명단
+      parameters:
+        - $ref: "#/components/parameters/OperatingDate"
+        - name: dormitoryRoom
+          in: query
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        "200":
+          description: 이름·학번·내부 id순. 과거는 요약, 도입 전 폐기 기록은 빈 배열
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/RoomAttendanceStudentResponse" }
+        "400": { description: 잘못된 호실·날짜 또는 보관 범위 밖 날짜 }
+        "401": { description: 비로그인 }
+        "403": { description: 관리자 전용(ADMIN_ONLY) }
   /api/v1/room/student:
     get:
       tags: [호실]
@@ -152,6 +215,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 components:
+  parameters:
+    OperatingDate:
+      name: date
+      in: query
+      required: false
+      description: "운영일 yyyy-MM-dd. 기본 오늘. 오늘-30일 ~ 오늘만 허용, 미래·범위 밖은 400 INVALID_REQUEST. 과거는 읽기 전용이며 원본 시각·방식은 보관하지 않는다."
+      schema: { type: string, format: date }
   securitySchemes:
     sessionCookie:
       type: apiKey
