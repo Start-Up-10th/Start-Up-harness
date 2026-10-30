@@ -26,6 +26,13 @@
 - 제공자: CheckUp-server([CheckUp-server#101](https://github.com/Start-Up-10th/CheckUp-server/pull/101)에서 `attended`·`purpose` 추가). 소비자: 학생 웹 홈 `내 호실` 카드, 관리자 호실 상세. 정책은 REQ-UI-003, REQ-ATT-001, DEC-023, 세부는 [호실 명단 계획](../docs/plans/room-roster.md).
 - `attended`는 `purpose`(기본 `DORMITORY`)의 오늘 운영일 출석 상태다. 학생은 본인 호실만 조회한다.
 - 관리자 전개도 일괄 조회: `GET /api/v1/room/floor/students?floor=&purpose=`. 응답은 `{ floor, purpose, rooms: [{ dormitoryRoom, students: [{ student_id, student_name, student_class, student_number, attended }] }] }`다. 학생·출석을 단일 쿼리로 읽고 호실 번호·학생 이름순으로 준다. 제공자: CheckUp-server#268, 소비자: CheckUp-Client#394. 기존 층 집계 API와 학생 본인 호실 API는 유지한다.
+- 관리자의 호실 수동 출석 저장은 `PUT /api/v1/room/{dormitoryRoom}/attendance?purpose=`를 쓴다. 본문은 `students: [{ studentId, attended }]`이며 DataGSM 학생 id를 사용한다. 개별 학생 수정은 `PUT /api/v1/room/student/{studentId}/attendance`다. 둘 다 오늘 운영일만 변경할 수 있으며 과거 날짜는 조회 전용이다. 계약은 [room.openapi.yaml](room.openapi.yaml)에 있다.
+
+## 학생 본인 출석 (구현됨)
+
+- `GET /api/v1/attendance/me`: 로그인 학생 본인의 오늘 운영일 기숙사·자습실 출석 상태를 반환한다. 다른 학생 id를 받지 않는다. 기록이 없으면 미출석이며 수동 출석이면 인증 시각이 null일 수 있다.
+- `GET /api/v1/attendance/active`: 용도별 현재 출석 접수 여부를 반환한다.
+- 제공자: CheckUp-server. 소비자: 학생 웹 홈. 상세는 [학생 출석 계획](../docs/plans/student-attendance.md).
 
 ## 봉사 관리 (구현됨)
 

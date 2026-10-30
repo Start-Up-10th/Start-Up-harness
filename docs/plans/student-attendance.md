@@ -3,9 +3,10 @@
 ## 담당자·API
 
 - 담당자: 김준수
-- `GET /api/v1/student`
-- `GET /api/v1/attend`
-- `GET /api/v1/student/work`
+- `GET /api/v1/attendance/me` — 로그인한 학생 본인의 오늘 운영일 기숙사·자습실 출석 상태. 다른 학생 id를 받지 않는다.
+- `GET /api/v1/attendance/active` — 학생 본인 기준 용도별 현재 출석 접수 여부.
+- `GET /api/v1/auth/me` — 학생 프로필과 DataGSM student id.
+- `GET /api/v1/users/{studentId}/volunteer` 및 `/history` — 본인 남은 횟수와 완료 내역.
 
 ## 구현
 
@@ -17,6 +18,7 @@
 - 학생이 타인의 출석·봉사 횟수를 조회하지 못하도록 제한
 
 - 출석 데이터는 QR·얼굴과 공유하는 출석 테이블을 읽는다. 스키마 제안은 [qr-attendance.md](qr-attendance.md) "출석 테이블 제안".
+- 계약 및 소비자 범위는 [contracts/README.md](../../contracts/README.md)에 기록한다. `GET /api/v1/attendance/me`는 `dormitory`, `studyRoom` 상태를 주며, 기록이 없으면 미출석이다.
 
 ## 계약 보완
 

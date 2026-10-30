@@ -5,6 +5,8 @@
 - 담당자: 임서하
 - `GET /api/v1/room/student?dormitoryRoom={호실}&purpose={DORMITORY|STUDY_ROOM}` — 계약: [room.openapi.yaml](../../contracts/room.openapi.yaml)
 - `GET /api/v1/room/floor/students?floor={층}&purpose={DORMITORY|STUDY_ROOM}` — 관리자 층별 학생 일괄 조회, 같은 계약에 정의(CheckUp-server#268, Client#394).
+- `PUT /api/v1/room/{dormitoryRoom}/attendance?purpose={DORMITORY|STUDY_ROOM}` — 관리자가 호실 학생 출석을 일괄 저장한다. 본문 `students`에는 DataGSM 학생 id와 `attended`를 보낸다. `date`는 생략하거나 오늘 운영일만 쓸 수 있다.
+- `PUT /api/v1/room/student/{studentId}/attendance` — 관리자가 한 학생의 기숙사 출석 상태를 수정한다. 상세 계약은 `room.openapi.yaml`에 둔다.
 
 ## 구현
 
@@ -17,6 +19,7 @@
 - `student_room_id` 입력을 서버 권한과 함께 검증한다.
 - 학생 홈은 본인 호실만 읽기 전용으로 표시한다.
 - `DataGsmStudentClient`가 학생 OpenAPI의 페이지를 모두 조회한 뒤 DataGSM 배정 인원 기준으로 방·층을 그룹화하며 정원을 4명으로 고정하지 않는다.
+- 관리자 수동 출석 저장은 오늘 운영일만 허용한다. 지난 날짜는 요약 조회만 가능하다(DEC-035).
 
 ## 계약 보완
 
@@ -25,7 +28,7 @@
 - [x] 호실별 반복 요청을 피하는 별도 `/room/floor/students` 계약을 정의한다. 기존 `/room/floor` 집계는 유지한다. 층 명단은 단일 scalar projection 쿼리로 읽고 호실 번호·학생 이름·학번·내부 id 순으로 정렬한다. 호실 상세와 같은 DataGSM 학생 id 기준과 학생 필드를 쓴다.
 - [ ] `GET https://openapi.datagsm.kr/v1/students`의 `STUDENT_READ` 권한, API 키 주입, 페이지네이션 응답을 확인한다.
 - [ ] 학생 OpenAPI의 졸업생·자퇴생 필터와 호실 변경 신호를 확인한다.
-- [ ] 호실별 수동 출석 저장 API가 없어 `REQ-ATT-006`을 완료 처리하지 않는다.
+- [x] 호실별 수동 출석 저장은 `PUT /api/v1/room/{dormitoryRoom}/attendance`로 제공한다. 호실 범위·중복 학생을 검증하고 요청 전체를 원자적으로 저장한다. 개인 수정 경로도 `PUT /api/v1/room/student/{studentId}/attendance`로 제공한다.
 - [x] 호실 명단에 출석 여부가 없었다. `attended`와 `purpose`를 추가했다(CheckUp-server#101).
 - [ ] 관리자 호실 상세(CheckUp-Client#82)가 용도 탭에 맞춰 `purpose`를 넘기는지 확인한다.
 

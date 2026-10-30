@@ -516,6 +516,25 @@
       "evidence": []
     },
     {
+      "id": "ACC-UI-007",
+      "requirements": [
+        "REQ-UI-007"
+      ],
+      "title": "앱 첫 화면 라우팅",
+      "given": "PWA 시작 경로 `/`와 인증 API 응답",
+      "when": "미로그인, 동의 전 학생, 동의한 학생, 서비스 관리자, 인증 확인 실패 상태로 앱을 연다",
+      "then": [
+        "미로그인 또는 사용자 정보 확인 실패는 `/login`으로 이동한다",
+        "동의하지 않은 학생은 `/consent`로 이동한다",
+        "동의한 학생은 `/main`으로 이동하고 얼굴 미등록이면 홈의 얼굴 등록 흐름을 따른다",
+        "서비스 관리자(자치위원 포함)는 `/admin`으로 이동한다",
+        "설치형 PWA의 start_url은 `/`로 유지한다"
+      ],
+      "status": "specified",
+      "implementation": [],
+      "evidence": []
+    },
+    {
       "id": "ACC-COM-001",
       "requirements": [
         "REQ-COM-001"

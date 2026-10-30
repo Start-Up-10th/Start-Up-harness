@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: CheckUp 호실 명단 API
-  version: 1.2.0
+  version: 1.3.0
   description: |
     호실 학생 명단과 오늘 출석 여부 조회 API다. 제공자는 CheckUp-server, 소비자는 학생 웹 홈 `내 호실` 카드와 관리자 호실 상세다.
     정책은 REQ-UI-003, REQ-ATT-001, DEC-023, 세부는 [호실 명단 계획](../docs/plans/room-roster.md)을 따른다.
@@ -152,6 +152,79 @@ paths:
         "400": { description: 잘못된 호실·날짜 또는 보관 범위 밖 날짜 }
         "401": { description: 비로그인 }
         "403": { description: 관리자 전용(ADMIN_ONLY) }
+  /api/v1/room/{dormitoryRoom}/attendance:
+    put:
+      tags: [호실]
+      summary: 관리자 호실 학생 출석 일괄 저장
+      description: |
+        관리자만 오늘 운영일의 학생 출석 상태를 저장한다. `students`에는 호실 명단의 DataGSM 학생 id를 보낸다.
+        호실 전체를 보낼 필요 없이 변경할 학생만 보낼 수 있다. 같은 학생의 중복 항목 또는 해당 호실에 속하지 않는 학생이 있으면 요청 전체를 저장하지 않는다.
+        `date`를 생략하면 오늘 운영일이며, 지정하는 경우에도 오늘 운영일만 쓸 수 있다. 지난 날짜 조회는 읽기 전용이다.
+      operationId: saveRoomAttendance
+      parameters:
+        - name: dormitoryRoom
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+        - name: purpose
+          in: query
+          required: false
+          schema: { type: string, enum: [DORMITORY, STUDY_ROOM], default: DORMITORY }
+        - name: date
+          in: query
+          required: false
+          description: 생략 가능. 지정하면 오늘 운영일만 허용하며 과거·미래는 400 INVALID_REQUEST.
+          schema: { type: string, format: date }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RoomAttendanceRequest" }
+            example:
+              students:
+                - studentId: 1001
+                  attended: true
+      responses:
+        "204": { description: 저장 완료 }
+        "400":
+          description: 잘못된 요청, 중복 학생, 호실에 속하지 않은 학생(STUDENT_NOT_IN_ROOM), 과거·미래 날짜(INVALID_REQUEST)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "401": { description: 비로그인(UNAUTHORIZED) }
+        "403": { description: 관리자 전용(ADMIN_ONLY) }
+  /api/v1/room/student/{studentId}/attendance:
+    put:
+      tags: [호실]
+      summary: 관리자 호실 학생 한 명의 출석 수정
+      description: 오늘 기숙사 운영일 상태를 수정한다. `date`는 생략하거나 오늘 운영일로 지정해야 한다. 과거 기록은 읽기 전용이다.
+      operationId: setManualRoomStudentAttendance
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          description: DataGSM 학생 id
+          schema: { type: integer, format: int64, minimum: 1 }
+        - name: date
+          in: query
+          required: false
+          description: 생략 가능. 지정하면 오늘 운영일만 허용하며 과거·미래는 400 INVALID_REQUEST.
+          schema: { type: string, format: date }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ManualRoomAttendanceRequest" }
+      responses:
+        "200":
+          description: 수정된 출석 상태
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ManualRoomAttendanceResponse" }
+        "400": { description: 잘못된 요청 또는 과거·미래 날짜(INVALID_REQUEST) }
+        "401": { description: 비로그인(UNAUTHORIZED) }
+        "403": { description: 관리자 전용(ADMIN_ONLY) }
+        "404": { description: 학생을 찾을 수 없음(STUDENT_NOT_FOUND) }
   /api/v1/room/student:
     get:
       tags: [호실]
@@ -282,6 +355,32 @@ components:
         attended:
           type: boolean
           description: 요청한 용도의 오늘 운영일에 지금 출석 상태인지
+    RoomAttendanceRequest:
+      type: object
+      required: [students]
+      properties:
+        students:
+          type: array
+          minItems: 1
+          maxItems: 50
+          description: 호실 명단의 학생 중 전체 또는 변경할 학생만 지정한다. DataGSM 학생 id 중복은 허용하지 않는다.
+          items:
+            type: object
+            required: [studentId, attended]
+            properties:
+              studentId: { type: integer, format: int64, description: DataGSM 학생 id }
+              attended: { type: boolean }
+    ManualRoomAttendanceRequest:
+      type: object
+      required: [attended]
+      properties:
+        attended: { type: boolean, description: 지정할 출석 여부 }
+    ManualRoomAttendanceResponse:
+      type: object
+      required: [student_id, attended]
+      properties:
+        student_id: { type: integer, format: int64, description: DataGSM 학생 id }
+        attended: { type: boolean, description: 수정 뒤 출석 여부 }
     ErrorResponse:
       type: object
       required: [code, message]

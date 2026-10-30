@@ -44,6 +44,7 @@
 | SRC-QR-NO-FACE | 사용자 2026-10-07 `QR 출석은 얼굴 등록 여부 확인 안해도 되는거 아니야?` 질문 뒤, 확인하지 않는 안(필수 동의만 확인) 선택(`1번으로`) | attendance 명세 REQ-ATT-005, DEC-032 (2026-10-06 #24의 얼굴 등록 확인 대체) |
 | SRC-VOLUNTEER-KIND | 사용자 2026-10-06: #176(프론트 요청, 봉사 이력 활동명) 방식 질문에 `B안`(조정 종류를 응답에 넣고 프론트가 종류별 기본 문구) 선택 | community 명세 REQ-COM-002, DEC-030 |
 | SRC-FACE-RECENT | 사용자 2026-10-06: #143 최근 인식 기록의 조회 범위와 실패 기록 시점을 추천안대로(`#143 추천대로`) 결정 — 그 관리자가 연 세션 기록만, 못 알아본 얼굴은 AI의 QR 안내 때만 한 줄 | face 명세 REQ-FACE-007, DEC-029 |
+| SRC-APP-START | CheckUp-Client#142 merged PR: `/` 및 PWA `start_url`의 인증 상태별 라우팅. 관리자(자치위원 포함) `/admin`, 미동의 학생 `/consent`, 동의 학생 `/main`, 미로그인·확인 실패 `/login`; 설치 기기 PWA 실행은 별도 미검증 | 화면 명세 REQ-UI-007, 수용 시나리오 ACC-UI-007 |
 | SRC-VOLUNTEER-ADJUST | 사용자 2026-10-06: #139(프론트 요청) 정책 질문에 사유 `선택`, 한 번에 조정 `1~99회`, 남은 횟수보다 많이 빼면 `0까지만`, 기존 increase·decrease API `유지` 선택 | community 명세 REQ-COM-002, DEC-027 |
 | SRC-VOLUNTEER-MISSED | CheckUp-server#250(웹 담당 요청): 기자위 선배 확인 `당일 봉사자로 지정됐는데 봉사를 하지 않고 사라진 학생(미이행)은 봉사 횟수가 추가된다`, 날짜별 기록·달력·미이행 처리 흐름. 사용자 2026-10-15 서버 정책안(지정 보존·자동 미이행·CANCELLED 없음·알림 유지·학생 내역 제외) 승인 | community 명세 REQ-COM-006, DEC-034 |
 | SRC-HANDOFF | 이 작업 직전 assistant의 16개 절 전체 명세 + AGENTS 제안 | 통합 기준으로 유지하되 assistant 추론은 직접 사용자 결정과 구분 |
